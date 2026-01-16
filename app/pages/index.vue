@@ -1,76 +1,115 @@
+<script setup lang="ts">
+interface NewsItem {
+  title: string
+  url: string
+  summary: string
+  tag: string
+  source: string
+}
+
+const { data: news } = await useFetch<NewsItem[]>('/data/latest.json')
+
+const currentDate = new Date().toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+})
+
+const colorMode = useColorMode()
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark'
+  },
+  set() {
+    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+  }
+})
+</script>
+
 <template>
-  <div>
-    <UPageHero
-      title="Nuxt Starter Template"
-      description="A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours."
-      :links="[{
-        label: 'Get started',
-        to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-        target: '_blank',
-        trailingIcon: 'i-lucide-arrow-right',
-        size: 'xl'
-      }, {
-        label: 'Use this template',
-        to: 'https://github.com/nuxt-ui-templates/starter',
-        target: '_blank',
-        icon: 'i-simple-icons-github',
-        size: 'xl',
-        color: 'neutral',
-        variant: 'subtle'
-      }]"
-    />
+  <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-orange-100 dark:selection:bg-orange-900/30 transition-colors duration-300 bg-noise">
+    <UContainer class="py-12 md:py-20 relative z-10">
+      <!-- Header -->
+      <header class="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div class="text-center md:text-left">
+          <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 mb-4">
+            POTLUCK
+          </h1>
+          <div class="flex flex-col md:flex-row md:items-center gap-4 text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-800 pt-4 max-w-xs md:max-w-none mx-auto md:mx-0">
+            <span class="uppercase tracking-widest text-sm font-medium">{{ currentDate }}</span>
+            <span class="hidden md:inline text-stone-300 dark:text-stone-700">•</span>
+            <span class="text-sm italic font-serif">Daily News Aggregator</span>
+          </div>
+        </div>
 
-    <UPageSection
-      id="features"
-      title="Everything you need to build modern Nuxt apps"
-      description="Start with a solid foundation. This template includes all the essentials for building production-ready applications with Nuxt UI's powerful component system."
-      :features="[{
-        icon: 'i-lucide-rocket',
-        title: 'Production-ready from day one',
-        description: 'Pre-configured with TypeScript, ESLint, Tailwind CSS, and all the best practices. Focus on building features, not setting up tooling.'
-      }, {
-        icon: 'i-lucide-palette',
-        title: 'Beautiful by default',
-        description: 'Leveraging Nuxt UI\'s design system with automatic dark mode, consistent spacing, and polished components that look great out of the box.'
-      }, {
-        icon: 'i-lucide-zap',
-        title: 'Lightning fast',
-        description: 'Optimized for performance with SSR/SSG support, automatic code splitting, and edge-ready deployment. Your users will love the speed.'
-      }, {
-        icon: 'i-lucide-blocks',
-        title: '100+ components included',
-        description: 'Access Nuxt UI\'s comprehensive component library. From forms to navigation, everything is accessible, responsive, and customizable.'
-      }, {
-        icon: 'i-lucide-code-2',
-        title: 'Developer experience first',
-        description: 'Auto-imports, hot module replacement, and TypeScript support. Write less boilerplate and ship more features.'
-      }, {
-        icon: 'i-lucide-shield-check',
-        title: 'Built for scale',
-        description: 'Enterprise-ready architecture with proper error handling, SEO optimization, and security best practices built-in.'
-      }]"
-    />
+        <ClientOnly>
+          <UButton
+            :icon="isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'"
+            color="neutral"
+            variant="ghost"
+            aria-label="Theme"
+            class="self-center md:self-end md:mb-4"
+            @click="isDark = !isDark"
+          />
+        </ClientOnly>
+      </header>
 
-    <UPageSection>
-      <UPageCTA
-        title="Ready to build your next Nuxt app?"
-        description="Join thousands of developers building with Nuxt and Nuxt UI. Get this template and start shipping today."
-        variant="subtle"
-        :links="[{
-          label: 'Start building',
-          to: 'https://ui.nuxt.com/docs/getting-started/installation/nuxt',
-          target: '_blank',
-          trailingIcon: 'i-lucide-arrow-right',
-          color: 'neutral'
-        }, {
-          label: 'View on GitHub',
-          to: 'https://github.com/nuxt-ui-templates/starter',
-          target: '_blank',
-          icon: 'i-simple-icons-github',
-          color: 'neutral',
-          variant: 'outline'
-        }]"
-      />
-    </UPageSection>
+      <!-- News Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <UCard
+          v-for="(item, index) in news"
+          :key="index"
+          as="a"
+          :href="item.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group hover:ring-2 hover:ring-primary-500/20 hover:shadow-lg transition-all duration-300 h-full flex flex-col border border-stone-200 dark:border-stone-800 shadow-sm rounded-none bg-white/50 dark:bg-stone-900/50 backdrop-blur-sm"
+          :ui="{
+            body: 'flex-1 flex flex-col p-6',
+            header: 'hidden',
+            footer: 'hidden',
+            ring: '',
+            shadow: ''
+          }"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <UBadge 
+              color="neutral" 
+              variant="subtle" 
+              class="uppercase text-xs tracking-wider font-medium rounded-none"
+            >
+              {{ item.tag }}
+            </UBadge>
+            
+            <UIcon 
+              name="i-lucide-arrow-up-right" 
+              class="w-5 h-5 text-stone-300 group-hover:text-primary-500 transition-colors" 
+            />
+          </div>
+
+          <h2 class="text-xl md:text-2xl font-bold text-stone-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors leading-tight font-serif">
+            {{ item.title }}
+          </h2>
+
+          <p class="text-stone-600 dark:text-stone-400 leading-relaxed mb-6 flex-1 text-sm md:text-base">
+            {{ item.summary }}
+          </p>
+
+          <div class="mt-auto pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center text-xs text-stone-500 dark:text-stone-500 font-medium uppercase tracking-wide">
+            <span>via {{ item.source }}</span>
+          </div>
+        </UCard>
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-20 pt-8 border-t border-stone-200 dark:border-stone-800 text-center text-sm text-stone-400 dark:text-stone-600 font-serif italic">
+        <p>Generated by Potluck</p>
+      </footer>
+    </UContainer>
   </div>
 </template>
+
+<style scoped>
+/* Scoped styles can remain empty if global styles cover everything */
+</style>
