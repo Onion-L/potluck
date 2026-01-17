@@ -38,7 +38,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
 </script>
 
 <template>
-  <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-orange-100 dark:selection:bg-orange-900/30 transition-colors duration-300 bg-noise">
+  <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-stone-200 dark:selection:bg-stone-800 transition-colors duration-300 bg-noise">
     <UContainer class="py-12 md:py-20 relative z-10 max-w-4xl">
       <!-- Header -->
       <AppHeader />
@@ -58,15 +58,15 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                 :href="item.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="flex items-baseline gap-3 py-2 group-hover:text-orange-600 transition-colors"
+                class="flex items-baseline gap-3 py-3 px-4 -mx-4 rounded-lg transition-all duration-300 group-hover:translate-x-2"
               >
                 <!-- Marker -->
-                <span class="text-orange-600 font-bold text-xs shrink-0 select-none">
+                <span class="text-stone-900 dark:text-stone-100 font-bold text-xs shrink-0 select-none">
                   —
                 </span>
 
                 <!-- Title -->
-                <span class="font-serif font-bold text-base md:text-lg text-stone-900 dark:text-stone-100 leading-tight group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors flex-1">
+                <span class="font-serif font-bold text-base md:text-lg text-stone-900 dark:text-stone-100 leading-tight group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors flex-1">
                   {{ item.title }}
                 </span>
 
@@ -95,25 +95,25 @@ const currentDate = new Date().toLocaleDateString('en-US', {
               :href="item.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="block grid md:grid-cols-[1fr,3fr] gap-6 md:gap-12 items-baseline"
+              class="block grid md:grid-cols-[1fr,3fr] gap-6 md:gap-12 items-baseline p-6 -m-6 rounded-2xl transition-all duration-300 group-hover:translate-x-1"
             >
               <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500">
-                <span class="text-orange-600 dark:text-orange-400">{{ formatTime(item.publishedAt) }}</span>
+                <span class="text-stone-900 dark:text-stone-100">{{ formatTime(item.publishedAt) }}</span>
                 <span class="text-stone-300 dark:text-stone-700">/</span>
                 <span>{{ item.tag }}</span>
               </div>
 
               <div>
-                <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-tight mb-3 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-tight mb-3 decoration-stone-900/30 dark:decoration-stone-100/30 underline-offset-4 decoration-2 group-hover:underline transition-all">
                   {{ item.title }}
                 </h3>
                 <p class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg mb-2">
                   {{ item.summary }}
                 </p>
-                <div class="text-xs text-stone-400 font-medium flex items-center gap-1 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                <div class="text-xs text-stone-400 font-medium flex items-center gap-1 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors">
                   {{ item.source }} <UIcon
                     name="i-lucide-arrow-up-right"
-                    class="w-3 h-3"
+                    class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                   />
                 </div>
               </div>
@@ -124,7 +124,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         <div class="mt-20 text-center">
           <NuxtLink
             to="/timeline"
-            class="inline-flex items-center gap-2 text-lg font-serif italic text-stone-500 hover:text-orange-600 dark:text-stone-400 dark:hover:text-orange-400 transition-colors"
+            class="inline-flex items-center gap-2 text-lg font-serif italic text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
           >
             View Full Timeline <UIcon
               name="i-lucide-arrow-right"

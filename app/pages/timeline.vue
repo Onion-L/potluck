@@ -72,7 +72,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
 </script>
 
 <template>
-  <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-orange-100 dark:selection:bg-orange-900/30 transition-colors duration-300 bg-noise">
+  <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-stone-200 dark:selection:bg-stone-800 transition-colors duration-300 bg-noise">
     <UContainer class="py-12 md:py-20 relative z-10 max-w-4xl">
       <!-- Header -->
       <AppHeader />
@@ -86,7 +86,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         >
           <!-- Date Header -->
           <div class="sticky top-6 z-30 mb-12 flex justify-start -ml-4 md:-ml-8">
-            <h2 class="text-4xl md:text-5xl font-serif font-bold text-stone-900 dark:text-stone-100 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md px-6 py-2 rounded-r-full shadow-sm border-l-8 border-orange-500">
+            <h2 class="text-4xl md:text-5xl font-serif font-bold text-stone-900 dark:text-stone-100 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md px-6 py-2 rounded-r-full shadow-sm border-l-8 border-stone-900 dark:border-stone-100">
               {{ formatDateHeader(date) }}
             </h2>
           </div>
@@ -98,30 +98,30 @@ const currentDate = new Date().toLocaleDateString('en-US', {
               class="relative pl-8 md:pl-12 group"
             >
               <!-- Timeline Node -->
-              <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-orange-500 group-hover:scale-110 transition-all duration-300 z-10" />
+              <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 group-hover:shadow-[0_0_0_4px_rgba(0,0,0,0.05)] dark:group-hover:shadow-[0_0_0_4px_rgba(255,255,255,0.1)] transition-all duration-300 z-10" />
 
               <!-- Content -->
               <a
                 :href="item.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="block group-hover:-translate-y-1 transition-transform duration-300"
+                class="block group-hover:-translate-y-1 transition-transform duration-300 p-4 -m-4 rounded-xl"
               >
                 <div class="flex flex-col gap-3">
                   <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
-                    <span class="text-orange-600 dark:text-orange-400 font-bold">{{ formatTime(item.publishedAt) }}</span>
+                    <span class="text-stone-900 dark:text-stone-100 font-bold">{{ formatTime(item.publishedAt) }}</span>
                     <span>•</span>
                     <span class="bg-stone-100 dark:bg-stone-900 px-2 py-0.5 rounded text-stone-600 dark:text-stone-400">{{ item.tag }}</span>
-                    <span class="ml-auto flex items-center gap-1 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                    <span class="ml-auto flex items-center gap-1 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors">
                       {{ item.source }}
                       <UIcon
                         name="i-lucide-arrow-up-right"
-                        class="w-3 h-3"
+                        class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                       />
                     </span>
                   </div>
 
-                  <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-white leading-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                  <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-white leading-tight decoration-stone-900/30 dark:decoration-stone-100/30 underline-offset-4 decoration-2 group-hover:underline transition-all">
                     {{ item.title }}
                   </h3>
 

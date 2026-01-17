@@ -35,19 +35,18 @@ const isTimeline = computed(() => route.path === '/timeline')
     </div>
 
     <div class="flex items-center gap-6 self-center md:self-end md:mb-4">
-      <nav class="flex items-center gap-4">
+      <nav class="flex items-center gap-6">
         <NuxtLink
           to="/"
-          class="text-sm font-medium tracking-wide transition-colors"
-          :class="isHome ? 'text-orange-600 dark:text-orange-400' : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'"
+          class="text-sm tracking-wide transition-all duration-300 decoration-2 underline-offset-4"
+          :class="isHome ? 'font-bold text-stone-900 underline dark:text-stone-100' : 'font-medium text-stone-500 hover:text-stone-900 hover:underline dark:text-stone-400 dark:hover:text-stone-50'"
         >
           Today
         </NuxtLink>
-        <span class="text-stone-300 dark:text-stone-700">/</span>
         <NuxtLink
           to="/timeline"
-          class="text-sm font-medium tracking-wide transition-colors"
-          :class="isTimeline ? 'text-orange-600 dark:text-orange-400' : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200'"
+          class="text-sm tracking-wide transition-all duration-300 decoration-2 underline-offset-4"
+          :class="isTimeline ? 'font-bold text-stone-900 underline dark:text-stone-100' : 'font-medium text-stone-500 hover:text-stone-900 hover:underline dark:text-stone-400 dark:hover:text-stone-50'"
         >
           Timeline
         </NuxtLink>
