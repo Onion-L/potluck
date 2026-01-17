@@ -1,13 +1,36 @@
 <script setup lang="ts">
-interface NewsItem {
+import newsData from '~/assets/data/latest.json'
+
+interface _NewsItem {
   title: string
   url: string
   summary: string
   tag: string
   source: string
+  publishedAt: string
 }
 
-const { data: news } = await useFetch<NewsItem[]>('/data/latest.json')
+const news = ref(newsData)
+
+// Get today's date in YYYY-MM-DD
+// Note: In a real app we'd want to be careful about server/client timezone mismatch
+// For this mock data context, we'll align with the mock data's "today" which is 2026-01-17
+const TODAY_DATE = '2026-01-17'
+
+const todaysNews = computed(() => {
+  if (!news.value) return []
+
+  return news.value
+    .filter(item => item.publishedAt.startsWith(TODAY_DATE))
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+})
+
+const heroStory = computed(() => todaysNews.value[0])
+const otherStories = computed(() => todaysNews.value.slice(1))
+
+const formatTime = (isoString: string) => {
+  return new Date(isoString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+}
 
 const currentDate = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -15,101 +38,133 @@ const currentDate = new Date().toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric'
 })
-
-const colorMode = useColorMode()
-const isDark = computed({
-  get() {
-    return colorMode.value === 'dark'
-  },
-  set() {
-    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
-  }
-})
 </script>
 
 <template>
   <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-orange-100 dark:selection:bg-orange-900/30 transition-colors duration-300 bg-noise">
-    <UContainer class="py-12 md:py-20 relative z-10">
+    <UContainer class="py-12 md:py-20 relative z-10 max-w-4xl">
       <!-- Header -->
-      <header class="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div class="text-center md:text-left">
-          <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 mb-4">
-            POTLUCK
-          </h1>
-          <div class="flex flex-col md:flex-row md:items-center gap-4 text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-800 pt-4 max-w-xs md:max-w-none mx-auto md:mx-0">
-            <span class="uppercase tracking-widest text-sm font-medium">{{ currentDate }}</span>
-            <span class="hidden md:inline text-stone-300 dark:text-stone-700">•</span>
-            <span class="text-sm italic font-serif">Daily News Aggregator</span>
-          </div>
+      <AppHeader />
+
+      <main v-if="todaysNews.length > 0">
+        <!-- Hero Section -->
+        <article
+          v-if="heroStory"
+          class="mb-20 md:mb-24 group"
+        >
+          <a
+            :href="heroStory.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block"
+          >
+            <div class="flex items-center gap-3 text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-4">
+              <span class="text-orange-600 dark:text-orange-400 font-bold">Top Story</span>
+              <span class="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-700" />
+              <span>{{ formatTime(heroStory.publishedAt) }}</span>
+              <span class="ml-auto bg-stone-100 dark:bg-stone-900 px-3 py-1 rounded-full text-stone-600 dark:text-stone-400 text-xs">{{ heroStory.tag }}</span>
+            </div>
+
+            <h2 class="text-5xl md:text-7xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-[0.95] mb-6 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+              {{ heroStory.title }}
+            </h2>
+
+            <p class="text-xl md:text-2xl text-stone-600 dark:text-stone-300 leading-relaxed font-serif max-w-3xl border-l-4 border-stone-200 dark:border-stone-800 pl-6">
+              {{ heroStory.summary }}
+            </p>
+
+            <div class="mt-4 flex items-center gap-2 text-stone-400 text-sm font-medium pl-7 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+              Read on {{ heroStory.source }} <UIcon
+                name="i-lucide-arrow-right"
+                class="w-4 h-4"
+              />
+            </div>
+          </a>
+        </article>
+
+        <!-- Divider -->
+        <div class="h-px bg-stone-200 dark:bg-stone-800 mb-16" />
+
+        <!-- Remaining Stories List -->
+        <div class="grid gap-12">
+          <article
+            v-for="(item, index) in otherStories"
+            :key="index"
+            class="group border-b border-stone-100 dark:border-stone-900/50 pb-12 last:border-0"
+          >
+            <a
+              :href="item.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="block grid md:grid-cols-[1fr,3fr] gap-6 md:gap-12 items-baseline"
+            >
+              <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500">
+                <span class="text-orange-600 dark:text-orange-400">{{ formatTime(item.publishedAt) }}</span>
+                <span class="text-stone-300 dark:text-stone-700">/</span>
+                <span>{{ item.tag }}</span>
+              </div>
+
+              <div>
+                <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-tight mb-3 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                  {{ item.title }}
+                </h3>
+                <p class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg mb-2">
+                  {{ item.summary }}
+                </p>
+                <div class="text-xs text-stone-400 font-medium flex items-center gap-1 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                  {{ item.source }} <UIcon
+                    name="i-lucide-arrow-up-right"
+                    class="w-3 h-3"
+                  />
+                </div>
+              </div>
+            </a>
+          </article>
         </div>
 
-        <ClientOnly>
-          <UButton
-            :icon="isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'"
-            color="neutral"
-            variant="ghost"
-            aria-label="Theme"
-            class="self-center md:self-end md:mb-4"
-            @click="isDark = !isDark"
-          />
-        </ClientOnly>
-      </header>
-
-      <!-- News Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        <UCard
-          v-for="(item, index) in news"
-          :key="index"
-          as="a"
-          :href="item.url"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group hover:ring-2 hover:ring-primary-500/20 hover:shadow-lg transition-all duration-300 h-full flex flex-col border border-stone-200 dark:border-stone-800 shadow-sm rounded-none bg-white/50 dark:bg-stone-900/50 backdrop-blur-sm"
-          :ui="{
-            body: 'flex-1 flex flex-col p-6',
-            header: 'hidden',
-            footer: 'hidden',
-            ring: '',
-            shadow: ''
-          }"
-        >
-          <div class="flex justify-between items-start mb-4">
-            <UBadge 
-              color="neutral" 
-              variant="subtle" 
-              class="uppercase text-xs tracking-wider font-medium rounded-none"
-            >
-              {{ item.tag }}
-            </UBadge>
-            
-            <UIcon 
-              name="i-lucide-arrow-up-right" 
-              class="w-5 h-5 text-stone-300 group-hover:text-primary-500 transition-colors" 
+        <div class="mt-20 text-center">
+          <NuxtLink
+            to="/timeline"
+            class="inline-flex items-center gap-2 text-lg font-serif italic text-stone-500 hover:text-orange-600 dark:text-stone-400 dark:hover:text-orange-400 transition-colors"
+          >
+            View Full Timeline <UIcon
+              name="i-lucide-arrow-right"
+              class="w-5 h-5"
             />
-          </div>
+          </NuxtLink>
+        </div>
+      </main>
 
-          <h2 class="text-xl md:text-2xl font-bold text-stone-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors leading-tight font-serif">
-            {{ item.title }}
-          </h2>
-
-          <p class="text-stone-600 dark:text-stone-400 leading-relaxed mb-6 flex-1 text-sm md:text-base">
-            {{ item.summary }}
-          </p>
-
-          <div class="mt-auto pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center text-xs text-stone-500 dark:text-stone-500 font-medium uppercase tracking-wide">
-            <span>via {{ item.source }}</span>
-          </div>
-        </UCard>
+      <div
+        v-else
+        class="py-20 text-center"
+      >
+        <div class="inline-block p-4 rounded-full bg-stone-100 dark:bg-stone-900 mb-6">
+          <UIcon
+            name="i-heroicons-newspaper"
+            class="w-8 h-8 text-stone-400"
+          />
+        </div>
+        <h2 class="text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 mb-4">
+          No News Today
+        </h2>
+        <p class="text-stone-500 dark:text-stone-400 max-w-md mx-auto mb-8">
+          The press seems quiet today. Check back later or explore previous days.
+        </p>
+        <UButton
+          to="/timeline"
+          size="xl"
+          color="orange"
+          variant="soft"
+        >
+          Browse History
+        </UButton>
       </div>
 
       <!-- Footer -->
-      <footer class="mt-20 pt-8 border-t border-stone-200 dark:border-stone-800 text-center text-sm text-stone-400 dark:text-stone-600 font-serif italic">
-        <p>Generated by Potluck</p>
+      <footer class="mt-32 pt-12 border-t border-stone-200 dark:border-stone-800 text-center text-sm text-stone-400 dark:text-stone-600 font-serif italic pb-12">
+        <p>Generated by Potluck • {{ currentDate }}</p>
       </footer>
     </UContainer>
   </div>
 </template>
-
-<style scoped>
-/* Scoped styles can remain empty if global styles cover everything */
-</style>
