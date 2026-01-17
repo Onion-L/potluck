@@ -47,13 +47,17 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         <!-- Quick Headlines List -->
         <section class="mb-16 md:mb-20">
           <div class="mb-6 flex justify-end items-baseline">
-             <div class="text-xs font-mono font-bold text-stone-400 uppercase">
-                {{ todaysNews.length }} Updates
-             </div>
+            <div class="text-xs font-mono font-bold text-stone-400 uppercase">
+              {{ todaysNews.length }} Updates
+            </div>
           </div>
 
           <ul class="flex flex-col">
-            <li v-for="(item, index) in todaysNews" :key="`headline-${index}`" class="group border-b border-stone-200 dark:border-stone-800/60 last:border-0 border-dashed">
+            <li
+              v-for="(item, index) in todaysNews"
+              :key="`headline-${index}`"
+              class="group border-b border-stone-200 dark:border-stone-800/60 last:border-0 border-dashed"
+            >
               <a
                 :href="item.url"
                 target="_blank"
