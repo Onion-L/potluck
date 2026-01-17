@@ -25,9 +25,6 @@ const todaysNews = computed(() => {
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 })
 
-const heroStory = computed(() => todaysNews.value[0])
-const otherStories = computed(() => todaysNews.value.slice(1))
-
 const formatTime = (isoString: string) => {
   return new Date(isoString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
@@ -47,48 +44,50 @@ const currentDate = new Date().toLocaleDateString('en-US', {
       <AppHeader />
 
       <main v-if="todaysNews.length > 0">
-        <!-- Hero Section -->
-        <article
-          v-if="heroStory"
-          class="mb-20 md:mb-24 group"
-        >
-          <a
-            :href="heroStory.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block"
-          >
-            <div class="flex items-center gap-3 text-sm font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-4">
-              <span class="text-orange-600 dark:text-orange-400 font-bold">Top Story</span>
-              <span class="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-700" />
-              <span>{{ formatTime(heroStory.publishedAt) }}</span>
-              <span class="ml-auto bg-stone-100 dark:bg-stone-900 px-3 py-1 rounded-full text-stone-600 dark:text-stone-400 text-xs">{{ heroStory.tag }}</span>
-            </div>
+        <!-- Quick Headlines List -->
+        <section class="mb-16 md:mb-20">
+          <div class="mb-6 flex justify-end items-baseline">
+             <div class="text-xs font-mono font-bold text-stone-400 uppercase">
+                {{ todaysNews.length }} Updates
+             </div>
+          </div>
 
-            <h2 class="text-5xl md:text-7xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-[0.95] mb-6 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-              {{ heroStory.title }}
-            </h2>
+          <ul class="flex flex-col">
+            <li v-for="(item, index) in todaysNews" :key="`headline-${index}`" class="group border-b border-stone-200 dark:border-stone-800/60 last:border-0 border-dashed">
+              <a
+                :href="item.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-baseline gap-3 py-2 group-hover:text-orange-600 transition-colors"
+              >
+                <!-- Marker -->
+                <span class="text-orange-600 font-bold text-xs shrink-0 select-none">
+                  —
+                </span>
 
-            <p class="text-xl md:text-2xl text-stone-600 dark:text-stone-300 leading-relaxed font-serif max-w-3xl border-l-4 border-stone-200 dark:border-stone-800 pl-6">
-              {{ heroStory.summary }}
-            </p>
+                <!-- Title -->
+                <span class="font-serif font-bold text-base md:text-lg text-stone-900 dark:text-stone-100 leading-tight group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors flex-1">
+                  {{ item.title }}
+                </span>
 
-            <div class="mt-4 flex items-center gap-2 text-stone-400 text-sm font-medium pl-7 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-              Read on {{ heroStory.source }} <UIcon
-                name="i-lucide-arrow-right"
-                class="w-4 h-4"
-              />
-            </div>
-          </a>
-        </article>
+                <!-- Time -->
+                <span class="font-sans text-xs font-bold text-stone-400 uppercase shrink-0 tracking-tighter">
+                  {{ formatTime(item.publishedAt) }}
+                </span>
 
-        <!-- Divider -->
-        <div class="h-px bg-stone-200 dark:bg-stone-800 mb-16" />
+                <!-- Time -->
+                <span class="font-mono text-xs font-bold text-stone-400 uppercase shrink-0 tracking-tighter">
+                  {{ formatTime(item.publishedAt) }}
+                </span>
+              </a>
+            </li>
+          </ul>
+        </section>
 
-        <!-- Remaining Stories List -->
+        <!-- Stories List -->
         <div class="grid gap-12">
           <article
-            v-for="(item, index) in otherStories"
+            v-for="(item, index) in todaysNews"
             :key="index"
             class="group border-b border-stone-100 dark:border-stone-900/50 pb-12 last:border-0"
           >
@@ -154,7 +153,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         <UButton
           to="/timeline"
           size="xl"
-          color="orange"
+          color="primary"
           variant="soft"
         >
           Browse History

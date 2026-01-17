@@ -24,7 +24,7 @@ const groupedNews = computed(() => {
 
   sortedNews.forEach((item) => {
     const date = new Date(item.publishedAt)
-    const dateKey = date.toISOString().split('T')[0] // YYYY-MM-DD
+    const dateKey = date.toISOString().split('T')[0] || '' // YYYY-MM-DD
 
     if (!groups[dateKey]) {
       groups[dateKey] = []

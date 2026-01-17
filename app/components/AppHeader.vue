@@ -22,7 +22,7 @@ const isTimeline = computed(() => route.path === '/timeline')
 </script>
 
 <template>
-  <header class="mb-20 md:mb-32 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-200 dark:border-stone-800 pb-8">
+  <header class="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-200 dark:border-stone-800 pb-8">
     <div class="text-center md:text-left">
       <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 mb-4">
         <NuxtLink to="/">POTLUCK</NuxtLink>
