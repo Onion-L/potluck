@@ -9,9 +9,10 @@ import 'dotenv/config'
 const NewsItemSchema = z.object({
   title: z.string(),
   url: z.string(),
-  summary: z.string().max(50, 'Summary must be under 50 chars').describe('Catchy, punchy Chinese one-liner to cure FOMO'),
+  summary: z.string().max(100, 'Summary must be concise').describe('Catchy, punchy Chinese one-liner to cure FOMO'),
   tag: z.enum(['AI', 'Dev', 'Crypto', 'Tech', 'Other']).describe('Category of the news'),
-  source: z.string()
+  source: z.string(),
+  publishedAt: z.string().describe('ISO 8601 date string of the article publication')
 })
 
 const NewsListSchema = z.object({
@@ -24,8 +25,7 @@ async function main() {
   console.log('🚀 Starting daily news aggregation...')
 
   const parser = new Parser()
-  // Using a more stable tech feed (Hacker News) as the previous one had malformed XML
-  const feedUrl = 'https://news.ycombinator.com/rss'
+  const feedUrl = 'https://news.smol.ai/rss.xml'
 
   try {
     const feed = await parser.parseURL(feedUrl)
@@ -34,16 +34,17 @@ async function main() {
     const latestItems = feed.items.slice(0, 5)
 
     const articlesContent = latestItems.map((item, index) => {
+      const date = item.isoDate || item.pubDate || new Date().toISOString()
       return `Article ${index + 1}:
 Title: ${item.title}
 Link: ${item.link}
+Date: ${date}
 Snippet: ${item.contentSnippet || item.content || ''}
 `
     }).join('\n---\n')
 
     console.log('🤖 Generating summaries with OpenAI...')
 
-    // Check if API key is set/valid before calling
     const apiKey = process.env.OPENAI_API_KEY
     const isMock = !apiKey || apiKey.includes('your_openai_api_key_here')
 
@@ -54,15 +55,16 @@ Snippet: ${item.contentSnippet || item.content || ''}
       items = latestItems.map((item, i) => ({
         title: item.title || 'Unknown Title',
         url: item.link || 'https://example.com',
-        summary: `[MOCK] This is a simulated summary for article ${i + 1} because no API key was provided.`,
-        tag: 'Tech' as const,
-        source: feed.title || 'Hacker News'
+        summary: `[MOCK] 这是一个模拟的中文摘要，用于演示 smol.ai 的 RSS 订阅功能 (文章 ${i + 1})。`,
+        tag: 'AI' as const,
+        source: feed.title || 'smol.ai',
+        publishedAt: item.isoDate || new Date().toISOString()
       }))
     } else {
       const { object } = await generateObject({
         model: openai('gpt-4o-mini'),
         schema: NewsListSchema,
-        system: 'You are a tech trend watcher. Summarize these articles into catchy, punchy Chinese one-liners to cure FOMO.',
+        system: 'You are a tech trend watcher. Summarize these articles into catchy, punchy Chinese one-liners to cure FOMO. Maintain the original publication date.',
         prompt: `Summarize the following articles:\n\n${articlesContent}`
       })
       items = object.items
@@ -70,7 +72,7 @@ Snippet: ${item.contentSnippet || item.content || ''}
 
     const finalData = items.map(item => ({
       ...item,
-      source: feed.title || 'Unknown Source'
+      source: item.source || feed.title || 'smol.ai'
     }))
 
     const outputPath = path.resolve(process.cwd(), 'public/data/latest.json')

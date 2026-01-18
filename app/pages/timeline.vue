@@ -8,10 +8,8 @@ interface NewsItem {
   publishedAt: string
 }
 
-// Dynamic fetch from public/data/latest.json (client-side only to avoid SSR path issues)
-const { data: newsData, status, error } = await useFetch<NewsItem[]>('/data/latest.json', {
-  server: false
-})
+// Dynamic fetch from server API
+const { data: newsData, status, error } = await useFetch<NewsItem[]>('/api/latest')
 
 // Check if there's any news data
 const hasNews = computed(() => Object.keys(groupedNews.value).length > 0)
@@ -213,9 +211,11 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                       {{ item.title }}
                     </h3>
 
-                    <p class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg max-w-2xl">
-                      {{ item.summary }}
-                    </p>
+                    <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg max-w-2xl">
+                      <MarkdownRenderer
+                        :content="item.summary"
+                      />
+                    </div>
                   </div>
                 </a>
               </article>
@@ -241,7 +241,3 @@ const currentDate = new Date().toLocaleDateString('en-US', {
     </UContainer>
   </div>
 </template>
-
-<style scoped>
-/* Scoped styles can remain empty if global styles cover everything */
-</style>

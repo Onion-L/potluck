@@ -1,66 +1,42 @@
 [
   {
-    "title": "Global Summit Reaches Historic Climate Agreement",
-    "url": "https://example.com/climate-agreement",
-    "summary": "Nations from around the world have unanimously agreed to a new comprehensive framework for reducing carbon emissions by 50% within the next decade. The agreement marks a significant turning point in international environmental policy.",
-    "tag": "Environment",
-    "source": "Global News Wire",
-    "publishedAt": "2026-01-17T09:30:00Z"
+    "title": "ChatGPT starts testing ads on free tier + new $8/mo Go plan in the US",
+    "url": "https://news.smol.ai/issues/26-01-16-chatgpt-ads/",
+    "summary": "[MOCK] 这是一个模拟的中文摘要，用于演示 smol.ai 的 RSS 订阅功能 (文章 1)。",
+    "tag": "AI",
+    "source": "AINews",
+    "publishedAt": "2026-01-16T05:44:39.000Z"
   },
   {
-    "title": "Tech Giant Unveils Revolutionary Quantum Processor",
-    "url": "https://example.com/quantum-processor",
-    "summary": "In a surprise announcement, leading researchers have demonstrated a new quantum processor capable of solving complex problems in seconds that would take traditional supercomputers millennia.",
-    "tag": "Technology",
-    "source": "TechDaily",
-    "publishedAt": "2026-01-17T14:15:00Z"
+    "title": "Open Responses: explicit spec for OpenAI's Responses API supported by OpenRouter, Ollama, Huggingface, vLLM, et al",
+    "url": "https://news.smol.ai/issues/26-01-15-openresponses/",
+    "summary": "[MOCK] 这是一个模拟的中文摘要，用于演示 smol.ai 的 RSS 订阅功能 (文章 2)。",
+    "tag": "AI",
+    "source": "AINews",
+    "publishedAt": "2026-01-15T05:44:39.000Z"
   },
   {
-    "title": "Urban Vertical Farming Sees 300% Growth in Major Cities",
-    "url": "https://example.com/vertical-farming",
-    "summary": "New report shows that sustainable urban agriculture is becoming a dominant source of fresh produce in metropolitan areas, significantly reducing food transportation costs and carbon footprint.",
-    "tag": "Sustainability",
-    "source": "EcoTimes",
-    "publishedAt": "2026-01-17T11:00:00Z"
+    "title": "not much happened today.",
+    "url": "https://news.smol.ai/issues/26-01-14-not-much/",
+    "summary": "[MOCK] 这是一个模拟的中文摘要，用于演示 smol.ai 的 RSS 订阅功能 (文章 3)。",
+    "tag": "AI",
+    "source": "AINews",
+    "publishedAt": "2026-01-14T05:44:39.000Z"
   },
   {
-    "title": "SpaceX Successfully Launches Mission to Mars Colony",
-    "url": "https://example.com/mars-mission",
-    "summary": "The Starship heavy booster lifted off this morning carrying essential supplies and the first module for the permanent Mars habitat, marking the beginning of a new era in space exploration.",
-    "tag": "Space",
-    "source": "AstroNews",
-    "publishedAt": "2026-01-16T08:45:00Z"
+    "title": "Anthropic Labs: Cowork, Claude Code, MCP, Skills incubator led by Mike Krieger and Ben Mann",
+    "url": "https://news.smol.ai/issues/26-01-13-not-much/",
+    "summary": "[MOCK] 这是一个模拟的中文摘要，用于演示 smol.ai 的 RSS 订阅功能 (文章 4)。",
+    "tag": "AI",
+    "source": "AINews",
+    "publishedAt": "2026-01-13T05:44:39.000Z"
   },
   {
-    "title": "Medical Breakthrough: New Treatment for Alzheimer's",
-    "url": "https://example.com/alzheimers-breakthrough",
-    "summary": "Clinical trials have shown promising results for a new gene therapy treatment that appears to reverse early-stage cognitive decline in patients with Alzheimer's disease.",
-    "tag": "Health",
-    "source": "MedJournal",
-    "publishedAt": "2026-01-16T16:20:00Z"
-  },
-  {
-    "title": "Electric Aviation Startup Secures Major Funding",
-    "url": "https://example.com/electric-aviation",
-    "summary": "A startup focusing on short-haul electric commercial flights has raised $500M in Series B funding, accelerating their timeline for commercial operations by 2028.",
-    "tag": "Business",
-    "source": "VentureBeat",
-    "publishedAt": "2026-01-16T10:10:00Z"
-  },
-  {
-    "title": "Ancient City Discovered in Amazon Rainforest",
-    "url": "https://example.com/amazon-discovery",
-    "summary": "LiDAR technology has revealed a vast network of settlements hidden beneath the canopy of the Amazon, suggesting the region supported a much larger population than previously thought.",
-    "tag": "Archaeology",
-    "source": "Science Weekly",
-    "publishedAt": "2026-01-15T13:00:00Z"
-  },
-  {
-    "title": "The Future of AI in Creative Arts",
-    "url": "https://example.com/ai-arts",
-    "summary": "Artists and technologists debate the role of generative AI in the future of creative expression, as new tools blur the line between human and machine-generated art.",
-    "tag": "Culture",
-    "source": "ArtReview",
-    "publishedAt": "2026-01-15T09:45:00Z"
+    "title": "Apple picks Google's Gemini to power Siri's next generation",
+    "url": "https://news.smol.ai/issues/26-01-12-gemini-apple/",
+    "summary": "[MOCK] 这是一个模拟的中文摘要，用于演示 smol.ai 的 RSS 订阅功能 (文章 5)。",
+    "tag": "AI",
+    "source": "AINews",
+    "publishedAt": "2026-01-12T05:44:39.000Z"
   }
 ]

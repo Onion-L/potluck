@@ -8,10 +8,8 @@ interface NewsItem {
   publishedAt: string
 }
 
-// Dynamic fetch from public/data/latest.json (client-side only to avoid SSR path issues)
-const { data: newsData, status, error } = await useFetch<NewsItem[]>('/data/latest.json', {
-  server: false
-})
+// Dynamic fetch from server API
+const { data: newsData, status, error } = await useFetch<NewsItem[]>('/api/latest')
 
 // Dynamically compute the latest date from the data (timezone-safe)
 const latestDate = computed(() => {
@@ -176,7 +174,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                 :href="item.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="block grid md:grid-cols-[1fr,3fr] gap-6 md:gap-12 items-baseline p-6 -m-6 rounded-2xl transition-all duration-300 group-hover:translate-x-1"
+                class="grid md:grid-cols-[1fr,3fr] gap-6 md:gap-12 items-baseline p-6 -m-6 rounded-2xl transition-all duration-300 group-hover:translate-x-1"
               >
                 <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500">
                   <span class="text-stone-900 dark:text-stone-100">{{ formatTime(item.publishedAt) }}</span>
@@ -188,9 +186,11 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                   <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-tight mb-3 decoration-stone-900/30 dark:decoration-stone-100/30 underline-offset-4 decoration-2 group-hover:underline transition-all">
                     {{ item.title }}
                   </h3>
-                  <p class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg mb-2">
-                    {{ item.summary }}
-                  </p>
+                  <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg mb-2">
+                    <MarkdownRenderer
+                      :content="item.summary"
+                    />
+                  </div>
                   <div class="text-xs text-stone-400 font-medium flex items-center gap-1 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors">
                     {{ item.source }} <UIcon
                       name="i-lucide-arrow-up-right"
