@@ -19,9 +19,11 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
     const trimmedHref = href.trim().toLowerCase()
 
     // Block dangerous protocols
-    if (trimmedHref.startsWith('javascript:') ||
-        trimmedHref.startsWith('data:') ||
-        trimmedHref.startsWith('vbscript:')) {
+    if (
+      trimmedHref.startsWith('javascript:')
+      || trimmedHref.startsWith('data:')
+      || trimmedHref.startsWith('vbscript:')
+    ) {
       node.setAttribute('href', '#')
     }
 
