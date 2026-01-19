@@ -44,8 +44,10 @@ const renderedHtml = computed(() => {
 </script>
 
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <div
     class="prose prose-stone dark:prose-invert prose-p:my-0 prose-a:text-stone-900 dark:prose-a:text-stone-100 prose-strong:text-stone-900 dark:prose-strong:text-stone-100 prose-headings:text-stone-900 dark:prose-headings:text-stone-100 prose-list-item:text-stone-600 dark:prose-list-item:text-stone-400 prose-code:text-stone-600 dark:prose-code:text-stone-400"
     v-html="renderedHtml"
   />
+  <!-- eslint-enable vue/no-v-html -->
 </template>

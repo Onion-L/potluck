@@ -15,6 +15,7 @@
     "@iconify-json/lucide": "^1.2.82",
     "@iconify-json/simple-icons": "^1.2.63",
     "@nuxt/ui": "^4.3.0",
+    "@nuxtjs/supabase": "^2.0.3",
     "@types/markdown-it": "^14.1.2",
     "ai": "^6.0.38",
     "dotenv": "^17.2.3",
@@ -22,6 +23,7 @@
     "markdown-it": "^14.1.0",
     "marked": "^17.0.1",
     "nuxt": "^4.2.2",
+    "openai": "^6.16.0",
     "rss-parser": "^3.13.0",
     "tailwindcss": "^4.1.18",
     "zod": "^4.3.5"
