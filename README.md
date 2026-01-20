@@ -35,6 +35,34 @@ Make sure to install the dependencies:
 pnpm install
 ```
 
+## Local Development
+
+This project uses Supabase for local development with Docker.
+
+**Start local Supabase:**
+
+```bash
+supabase start
+```
+
+This will start all Supabase services (database, auth, storage) locally.
+
+**Run the development server:**
+
+```bash
+pnpm dev
+```
+
+The app will be available at `http://localhost:3000`.
+
+**Migrations:**
+
+Create manual migration files in `supabase/migrations/`. Migrations are applied automatically when starting local Supabase.
+
+**Environment:**
+
+Switch between environments using `.env.local` for local development overrides.
+
 ## Development Server
 
 Start the development server on `http://localhost:3000`:
