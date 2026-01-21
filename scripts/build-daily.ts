@@ -1,3 +1,12 @@
+/**
+ * @deprecated 此脚本已废弃，请使用 /api/ingest 端点
+ *
+ * 保留原因:
+ * 1. 作为独立 CLI 工具的参考实现
+ * 2. 离线调试和开发测试
+ *
+ * 当前数据流: RSS → /api/ingest → Supabase → /api/latest → 前端
+ */
 import { z } from 'zod'
 import Parser from 'rss-parser'
 import { generateObject } from 'ai'

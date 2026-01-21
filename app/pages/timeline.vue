@@ -8,19 +8,33 @@ interface NewsItem {
   publishedAt: string
 }
 
+interface ApiResponse {
+  data: NewsItem[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
 // Dynamic fetch from server API
-const { data: newsData, status, error } = await useFetch<NewsItem[]>('/api/latest')
+const { data: response, status, error } = await useFetch<ApiResponse>('/api/latest')
+
+// Extract articles from response
+const newsData = computed(() => response.value?.data || [])
 
 // Check if there's any news data
 const hasNews = computed(() => Object.keys(groupedNews.value).length > 0)
 
 const groupedNews = computed(() => {
-  if (!newsData.value) return {}
+  const articles = newsData.value
+  if (!articles.length) return {}
 
   const groups: Record<string, NewsItem[]> = {}
 
   // Sort items by date descending first
-  const sortedNews = [...newsData.value].sort((a, b) =>
+  const sortedNews = [...articles].sort((a, b) =>
     new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   )
 

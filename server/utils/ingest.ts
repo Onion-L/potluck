@@ -1,4 +1,13 @@
 import OpenAI from 'openai'
+import { z } from 'zod'
+
+// Schema for AI-generated summary
+const AISummarySchema = z.object({
+  summary: z.string().max(500),
+  tags: z.array(z.string()).max(3).default(['Tech'])
+})
+
+type AISummary = z.infer<typeof AISummarySchema>
 
 // Initialize DeepSeek Client
 const getAIClient = () => {
@@ -9,13 +18,14 @@ const getAIClient = () => {
   })
 }
 
-export const generateSummary = async (title: string, content: string) => {
+export const generateSummary = async (title: string, content: string): Promise<AISummary> => {
   const client = getAIClient()
+  const truncatedContent = content.slice(0, 1000)
 
   const prompt = `
   Analyze this tech news article.
   Title: ${title}
-  Content: ${content.slice(0, 1000)}...
+  Content: ${truncatedContent}...
 
   Output valid JSON only:
   {
@@ -31,12 +41,30 @@ export const generateSummary = async (title: string, content: string) => {
       response_format: { type: 'json_object' }
     })
 
-    const content = response.choices[0]?.message?.content
-    if (!content) throw new Error('No AI content')
+    const responseContent = response.choices[0]?.message?.content
+    if (!responseContent) {
+      throw new Error('No AI content in response')
+    }
 
-    return JSON.parse(content)
+    // Parse and validate with Zod
+    const parsed = JSON.parse(responseContent)
+    const validated = AISummarySchema.parse(parsed)
+
+    return validated
   } catch (e) {
-    console.error('AI Gen Failed:', e)
-    return { summary: content.slice(0, 200), tags: ['Tech'] } // Fallback
+    // Log error details for debugging
+    if (e instanceof z.ZodError) {
+      console.error('[AI] Schema validation failed:', e.issues)
+    } else if (e instanceof SyntaxError) {
+      console.error('[AI] JSON parse failed:', e.message)
+    } else {
+      console.error('[AI] Generation failed:', e instanceof Error ? e.message : e)
+    }
+
+    // Return fallback with truncated content as summary
+    return {
+      summary: truncatedContent.slice(0, 200),
+      tags: ['Tech']
+    }
   }
 }

@@ -86,3 +86,39 @@ pnpm preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+## 🛠️ Data Flow & API Guide
+
+### Data Flow
+`RSS Feeds` → `/api/ingest` → `Supabase (articles table)` → `/api/latest` → `Frontend`
+
+### Local Setup (Detailed)
+1. **Start Database**:
+   ```bash
+   pnpm supabase start
+   ```
+   *Note: Ensure you copy the output Keys to `.env.local`*
+
+2. **Configure Environment**:
+   ```bash
+   cp .env.example .env.local
+   # Set SUPABASE_URL, SUPABASE_KEY, SUPABASE_SERVICE_KEY, INGEST_API_KEY
+   ```
+
+3. **Start App**:
+   ```bash
+   pnpm dev
+   ```
+
+### API Reference
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/latest` | GET | None | Fetch latest 50 articles. Publicly accessible. |
+| `/api/ingest` | POST | Bearer Token | Trigger RSS fetch & AI processing. Requires `INGEST_API_KEY`. |
+
+**Manual Ingest Trigger:**
+```bash
+curl -X POST http://localhost:3000/api/ingest \
+  -H "Authorization: Bearer <your-ingest-key>"
+```
