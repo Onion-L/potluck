@@ -8,81 +8,111 @@ interface NewsItem {
   publishedAt: string
 }
 
-interface ApiResponse {
+interface TimelineResponse {
   data: NewsItem[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
+  nextCursor: string | null
+  hasMore: boolean
+}
+
+// State
+const articles = ref<NewsItem[]>([])
+const nextCursor = ref<string | null>(null)
+const isLoading = ref(false)
+const hasMore = ref(true)
+const error = ref<Error | null>(null)
+const loadTrigger = ref<HTMLElement>()
+
+// Load function
+const loadMore = async () => {
+  if (isLoading.value || !hasMore.value) return
+
+  isLoading.value = true
+  error.value = null
+
+  try {
+    const params = nextCursor.value ? { cursor: nextCursor.value } : {}
+    const res = await $fetch<TimelineResponse>('/api/timeline', { params })
+
+    if (res.data.length) {
+      articles.value.push(...res.data)
+    }
+
+    nextCursor.value = res.nextCursor
+    hasMore.value = res.hasMore
+  } catch (e) {
+    console.error('Timeline load failed:', e)
+    error.value = e as Error
+  } finally {
+    isLoading.value = false
   }
 }
 
-// Dynamic fetch from server API
-const { data: response, status, error } = await useFetch<ApiResponse>('/api/latest')
-
-// Extract articles from response
-const newsData = computed(() => response.value?.data || [])
-
-// Check if there's any news data
-const hasNews = computed(() => Object.keys(groupedNews.value).length > 0)
-
+// Grouping logic (recomputed on append)
 const groupedNews = computed(() => {
-  const articles = newsData.value
-  if (!articles.length) return {}
+  if (!articles.value.length) return {}
 
   const groups: Record<string, NewsItem[]> = {}
 
-  // Sort items by date descending first
-  const sortedNews = [...articles].sort((a, b) =>
+  // Data is already sorted by API, but safety sort doesn't hurt
+  const sorted = [...articles.value].sort((a, b) =>
     new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   )
 
-  sortedNews.forEach((item) => {
-    // Extract date part directly from ISO string to avoid timezone issues
+  sorted.forEach((item) => {
     const dateKey = item.publishedAt.slice(0, 10)
-
-    if (!groups[dateKey]) {
-      groups[dateKey] = []
-    }
+    if (!groups[dateKey]) groups[dateKey] = []
     groups[dateKey].push(item)
   })
 
   return groups
 })
 
+// Initial load & Infinite Scroll
+onMounted(() => {
+  // Initial load
+  loadMore()
+
+  // Intersection Observer
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMore.value && !isLoading.value) {
+        loadMore()
+      }
+    },
+    { rootMargin: '200px' }
+  )
+
+  if (loadTrigger.value) observer.observe(loadTrigger.value!)
+
+  onUnmounted(() => observer.disconnect())
+})
+
 const formatDateHeader = (dateString: string) => {
-  // dateString is already YYYY-MM-DD format
   const today = new Date()
   const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
 
-  // Get today/yesterday in YYYY-MM-DD using local timezone
-  const tStr = today.toLocaleDateString('en-CA') // en-CA gives YYYY-MM-DD format
+  const tStr = today.toLocaleDateString('en-CA')
   const yStr = yesterday.toLocaleDateString('en-CA')
 
-  if (dateString === tStr) {
-    return 'Today'
-  } else if (dateString === yStr) {
-    return 'Yesterday'
-  } else {
-    // Parse as UTC to avoid off-by-one day issues
-    const parts = dateString.split('-').map(Number)
-    const year = parts[0] ?? 2000
-    const month = parts[1] ?? 1
-    const day = parts[2] ?? 1
-    const date = new Date(Date.UTC(year, month - 1, day))
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: 'UTC'
-    })
-  }
+  if (dateString === tStr) return 'Today'
+  if (dateString === yStr) return 'Yesterday'
+
+  const parts = dateString.split('-').map(Number)
+  const y = parts[0] ?? 2000
+  const m = (parts[1] ?? 1) - 1
+  const d = parts[2] ?? 1
+  const date = new Date(Date.UTC(y, m, d))
+
+  return date.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC'
+  })
 }
 
 const formatTime = (isoString: string) => {
-  // Use UTC to avoid timezone shifts
   const date = new Date(isoString)
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -102,28 +132,11 @@ const currentDate = new Date().toLocaleDateString('en-US', {
 <template>
   <div class="min-h-screen bg-stone-50 dark:bg-stone-950 font-sans selection:bg-stone-200 dark:selection:bg-stone-800 transition-colors duration-300 bg-noise">
     <UContainer class="py-12 md:py-20 relative z-10 max-w-4xl">
-      <!-- Header -->
       <AppHeader />
-
-      <!-- Loading State -->
-      <div
-        v-if="status === 'pending'"
-        class="py-20 text-center"
-      >
-        <div class="inline-block p-4 rounded-full bg-stone-100 dark:bg-stone-900 mb-6 animate-pulse">
-          <UIcon
-            name="i-lucide-loader-2"
-            class="w-8 h-8 text-stone-400 animate-spin"
-          />
-        </div>
-        <p class="text-stone-500 dark:text-stone-400">
-          Loading timeline...
-        </p>
-      </div>
 
       <!-- Error State -->
       <div
-        v-else-if="error"
+        v-if="error && articles.length === 0"
         class="py-20 text-center"
       >
         <div class="inline-block p-4 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
@@ -136,12 +149,12 @@ const currentDate = new Date().toLocaleDateString('en-US', {
           Failed to Load Timeline
         </h2>
         <p class="text-stone-500 dark:text-stone-400 max-w-md mx-auto mb-8">
-          {{ error.message || 'Unable to fetch timeline data. Please try again later.' }}
+          {{ error.message || 'Unable to fetch timeline data.' }}
         </p>
         <UButton
           color="primary"
           variant="soft"
-          @click="$router.go(0)"
+          @click="loadMore"
         >
           Retry
         </UButton>
@@ -149,7 +162,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
 
       <!-- Empty State -->
       <div
-        v-else-if="status === 'success' && !hasNews"
+        v-else-if="!isLoading && articles.length === 0"
         class="py-20 text-center"
       >
         <div class="inline-block p-4 rounded-full bg-stone-100 dark:bg-stone-900 mb-6">
@@ -161,9 +174,6 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         <h2 class="text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 mb-4">
           No History Yet
         </h2>
-        <p class="text-stone-500 dark:text-stone-400 max-w-md mx-auto mb-8">
-          The archive is empty. News will appear here once available.
-        </p>
         <UButton
           to="/"
           color="primary"
@@ -173,9 +183,9 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         </UButton>
       </div>
 
-      <!-- Timeline Feed -->
+      <!-- Timeline Content -->
       <div
-        v-else-if="status === 'success' && hasNews"
+        v-else
         class="space-y-24"
       >
         <section
@@ -196,10 +206,8 @@ const currentDate = new Date().toLocaleDateString('en-US', {
               :key="index"
               class="relative pl-8 md:pl-12 group"
             >
-              <!-- Timeline Node -->
-              <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 group-hover:shadow-[0_0_0_4px_rgba(0,0,0,0.05)] dark:group-hover:shadow-[0_0_0_4px_rgba(255,255,255,0.1)] transition-all duration-300 z-10" />
+              <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 transition-all duration-300 z-10" />
 
-              <!-- Content -->
               <a
                 :href="item.url"
                 target="_blank"
@@ -215,7 +223,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                       {{ item.source }}
                       <UIcon
                         name="i-lucide-arrow-up-right"
-                        class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        class="w-3 h-3"
                       />
                     </span>
                   </div>
@@ -225,9 +233,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                   </h3>
 
                   <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg max-w-2xl">
-                    <MarkdownRenderer
-                      :content="item.summary"
-                    />
+                    <MarkdownRenderer :content="item.summary" />
                   </div>
                 </div>
               </a>
@@ -236,8 +242,30 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         </section>
       </div>
 
+      <!-- Load Trigger / Spinner -->
+      <div
+        ref="loadTrigger"
+        class="py-12 text-center"
+      >
+        <div
+          v-if="isLoading"
+          class="inline-block p-3 rounded-full bg-stone-100 dark:bg-stone-900 animate-pulse"
+        >
+          <UIcon
+            name="i-lucide-loader-2"
+            class="w-6 h-6 text-stone-400 animate-spin"
+          />
+        </div>
+        <div
+          v-else-if="!hasMore && articles.length > 0"
+          class="text-stone-400 font-serif italic"
+        >
+          End of history
+        </div>
+      </div>
+
       <!-- Footer -->
-      <footer class="mt-32 pt-12 border-t border-stone-200 dark:border-stone-800 text-center text-sm text-stone-400 dark:text-stone-600 font-serif italic pb-12">
+      <footer class="mt-20 pt-12 border-t border-stone-200 dark:border-stone-800 text-center text-sm text-stone-400 dark:text-stone-600 font-serif italic pb-12">
         <p>Generated by Potluck • {{ currentDate }}</p>
       </footer>
     </UContainer>
