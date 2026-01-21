@@ -21,7 +21,8 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
-    deepseekApiKey: process.env.DEEPSEEK_API_KEY
+    deepseekApiKey: process.env.DEEPSEEK_API_KEY,
+    ingestApiKey: process.env.INGEST_API_KEY || ''
   },
 
   routeRules: {
@@ -40,6 +41,7 @@ export default defineNuxtConfig({
   },
 
   supabase: {
-    redirect: false
+    redirect: false,
+    serviceKey: process.env.SUPABASE_SERVICE_KEY
   }
 })

@@ -10,6 +10,7 @@ docs
 
 # Node dependencies
 node_modules
+.mcp.json
 
 # Logs
 logs

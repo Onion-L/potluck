@@ -4,6 +4,20 @@ import { generateSummary } from '../utils/ingest'
 import type { Database } from '../../app/types/database.types'
 
 export default defineEventHandler(async (event) => {
+  // Auth check
+  const config = useRuntimeConfig()
+  const authHeader = getHeader(event, 'authorization')
+  const token = authHeader?.replace('Bearer ', '')
+
+  if (!config.ingestApiKey) {
+    console.warn('⚠️ INGEST_API_KEY not configured - endpoint is unprotected')
+  } else if (token !== config.ingestApiKey) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized: Invalid or missing API key'
+    })
+  }
+
   const client = await serverSupabaseClient<Database>(event)
   const parser = new Parser()
 
@@ -15,6 +29,7 @@ export default defineEventHandler(async (event) => {
 
   for (const feed of feeds) {
     try {
+      console.log(feed.url)
       // 2. Parse RSS
       const parsed = await parser.parseURL(feed.url)
 

@@ -114,7 +114,6 @@ const currentDate = new Date().toLocaleDateString('en-US', {
         </p>
         <UButton
           to="/timeline"
-          size="xl"
           color="primary"
           variant="soft"
         >
