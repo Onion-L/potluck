@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 // Schema for AI-generated summary
 const AISummarySchema = z.object({
+  title: z.string().max(100),
   summary: z.string().max(500),
   tags: z.array(z.string()).max(3).default(['Tech'])
 })
@@ -29,6 +30,7 @@ export const generateSummary = async (title: string, content: string): Promise<A
 
   Output valid JSON only:
   {
+    "title": "Concise Chinese title, < 50 chars. Capture the key news point.",
     "summary": "Chinese summary in markdown, < 200 chars. Focus on value/impact.",
     "tags": ["Tag1", "Tag2"] (Max 2 tags, English, e.g. "AI", "Rust", "Vue")
   }
@@ -63,6 +65,7 @@ export const generateSummary = async (title: string, content: string): Promise<A
 
     // Return fallback with truncated content as summary
     return {
+      title: title,
       summary: truncatedContent.slice(0, 200),
       tags: ['Tech']
     }

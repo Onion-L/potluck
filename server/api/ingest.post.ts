@@ -187,7 +187,7 @@ export default defineEventHandler(async (event) => {
         // Insert
         const { error: insertError } = await client.from('articles').insert({
           feed_id: feed.id,
-          title: item.title!,
+          title: aiData.title,
           url: item.link!,
           summary: aiData.summary,
           tags: aiData.tags,
