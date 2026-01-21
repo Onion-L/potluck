@@ -77,7 +77,7 @@ If you are adding a significant feature, consider proposing the addition of Vite
   - `assets/`: Static assets and global CSS (`css/main.css`).
   - `app.config.ts`: App-level configuration.
 - `server/`: Server-side logic (Nitro).
-- `public/`: Public static files (e.g., `data/latest.json`, images).
+- `public/`: Public static files (e.g. images).
 - `nuxt.config.ts`: Main Nuxt configuration.
 
 ## 5. Error Handling
