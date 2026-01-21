@@ -5,7 +5,7 @@ import { generateSummary } from '../utils/ingest'
 import type { Database } from '../../app/types/database.types'
 
 // Simple in-memory rate limiter
-const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
+const rateLimitStore = new Map<string, { count: number, resetAt: number }>()
 const RATE_LIMIT_WINDOW_MS = 60 * 1000 // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 5
 
