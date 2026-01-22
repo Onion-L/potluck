@@ -105,109 +105,134 @@ async function fetchRSSWithTimeout(parser: Parser, url: string): Promise<Parser.
 }
 
 export default defineEventHandler(async (event) => {
-  // Rate limiting
-  const clientIP = getRequestIP(event, { xForwardedFor: true }) || 'unknown'
-  if (!checkRateLimit(clientIP)) {
-    throw createError({
-      statusCode: 429,
-      statusMessage: 'Too Many Requests: Rate limit exceeded'
-    })
-  }
+  try {
+    // Rate limiting
+    const clientIP = getRequestIP(event, { xForwardedFor: true }) || 'unknown'
+    if (!checkRateLimit(clientIP)) {
+      throw createError({
+        statusCode: 429,
+        statusMessage: 'Too Many Requests: Rate limit exceeded'
+      })
+    }
 
-  // Auth check
-  const config = useRuntimeConfig()
-  const authHeader = getHeader(event, 'authorization')
-  const token = authHeader?.replace('Bearer ', '')
+    // Auth check
+    const config = useRuntimeConfig()
+    const authHeader = getHeader(event, 'authorization')
+    const token = authHeader?.replace('Bearer ', '')
 
-  if (!config.ingestApiKey) {
-    console.warn('INGEST_API_KEY not configured - endpoint is unprotected')
-  } else if (!secureCompare(token || '', config.ingestApiKey)) {
-    console.warn(`[INGEST] Auth failed | IP: ${clientIP} | Time: ${new Date().toISOString()}`)
+    if (!config.ingestApiKey) {
+      console.warn('INGEST_API_KEY not configured - endpoint is unprotected')
+    } else if (!secureCompare(token || '', config.ingestApiKey)) {
+      console.warn(`[INGEST] Auth failed | IP: ${clientIP} | Time: ${new Date().toISOString()}`)
 
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized: Invalid or missing API key'
-    })
-  }
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Unauthorized: Invalid or missing API key'
+      })
+    }
 
-  // Use Service Role to bypass RLS for ingestion
-  const client = serverSupabaseServiceRole<Database>(event)
-  const parser = new Parser()
+    // Use Service Role to bypass RLS for ingestion
+    const client = serverSupabaseServiceRole<Database>(event)
+    const parser = new Parser()
 
-  // 1. Get Feeds
-  const { data: feeds } = await client.from('feeds').select('*').eq('is_active', true)
-  if (!feeds?.length) return { message: 'No active feeds' }
+    // 1. Get Feeds
+    const { data: feeds, error: feedsError } = await client.from('feeds').select('*').eq('is_active', true)
 
-  const stats = {
-    processed: 0,
-    added: 0,
-    skipped: 0,
-    errors: 0,
-    errorDetails: [] as string[]
-  }
+    if (feedsError) {
+      console.error('[INGEST] Database error fetching feeds:', feedsError)
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Database Error',
+        message: feedsError.message
+      })
+    }
 
-  for (const feed of feeds) {
-    try {
-      // SSRF protection: validate feed URL
-      if (!isValidFeedUrl(feed.url)) {
-        console.warn(`[INGEST] Skipping invalid/unsafe URL: ${feed.url}`)
-        stats.errors++
-        stats.errorDetails.push(`${feed.name}: Invalid or unsafe URL`)
-        continue
-      }
+    if (!feeds?.length) return { message: 'No active feeds' }
 
-      // 2. Parse RSS with timeout
-      const parsed = await fetchRSSWithTimeout(parser, feed.url)
+    const stats = {
+      processed: 0,
+      added: 0,
+      skipped: 0,
+      errors: 0,
+      errorDetails: [] as string[]
+    }
 
-      // 3. Get items to process (limit to 5 most recent)
-      const itemsToProcess = parsed.items.slice(0, 5).filter(item => item.link && item.title)
-      if (itemsToProcess.length === 0) {
-        stats.processed++
-        continue
-      }
-
-      // 4. Batch check for existing articles (N+1 optimization)
-      const urls = itemsToProcess.map(item => item.link as string)
-      const { data: existingArticles } = await client
-        .from('articles')
-        .select('url')
-        .in('url', urls)
-      const existingUrls = new Set(existingArticles?.map(a => a.url) || [])
-
-      // 5. Process new items only
-      for (const item of itemsToProcess) {
-        if (existingUrls.has(item.link!)) {
-          stats.skipped++
+    for (const feed of feeds) {
+      try {
+        // SSRF protection: validate feed URL
+        if (!isValidFeedUrl(feed.url)) {
+          console.warn(`[INGEST] Skipping invalid/unsafe URL: ${feed.url}`)
+          stats.errors++
+          stats.errorDetails.push(`${feed.name}: Invalid or unsafe URL`)
           continue
         }
 
-        // AI Generation
-        const aiData = await generateSummary(item.title!, item.contentSnippet || item.content || '')
+        // 2. Parse RSS with timeout
+        const parsed = await fetchRSSWithTimeout(parser, feed.url)
 
-        // Insert
-        const { error: insertError } = await client.from('articles').insert({
-          feed_id: feed.id,
-          title: aiData.title,
-          url: item.link!,
-          summary: aiData.summary,
-          tags: aiData.tags,
-          source: feed.name,
-          published_at: item.isoDate || new Date().toISOString()
-        })
-
-        if (insertError) {
-          throw new Error(`Insert failed: ${insertError.message}`)
+        // 3. Get items to process (limit to 5 most recent)
+        const itemsToProcess = parsed.items.slice(0, 5).filter(item => item.link && item.title)
+        if (itemsToProcess.length === 0) {
+          stats.processed++
+          continue
         }
 
-        stats.added++
+        // 4. Batch check for existing articles (N+1 optimization)
+        const urls = itemsToProcess.map(item => item.link as string)
+        const { data: existingArticles } = await client
+          .from('articles')
+          .select('url')
+          .in('url', urls)
+        const existingUrls = new Set(existingArticles?.map(a => a.url) || [])
+
+        // 5. Process new items only
+        for (const item of itemsToProcess) {
+          if (existingUrls.has(item.link!)) {
+            stats.skipped++
+            continue
+          }
+
+          // AI Generation
+          const aiData = await generateSummary(item.title!, item.contentSnippet || item.content || '')
+
+          // Insert
+          const { error: insertError } = await client.from('articles').insert({
+            feed_id: feed.id,
+            title: aiData.title,
+            url: item.link!,
+            summary: aiData.summary,
+            tags: aiData.tags,
+            source: feed.name,
+            published_at: item.isoDate || new Date().toISOString()
+          })
+
+          if (insertError) {
+            throw new Error(`Insert failed: ${insertError.message}`)
+          }
+
+          stats.added++
+        }
+        stats.processed++
+      } catch (e) {
+        const errorMsg = e instanceof Error ? e.message : 'Unknown error'
+        console.error(`[INGEST] Feed Error [${feed.name}]:`, errorMsg)
+        stats.errors++
+        stats.errorDetails.push(`${feed.name}: ${errorMsg}`)
       }
-      stats.processed++
-    } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : 'Unknown error'
-      console.error(`[INGEST] Feed Error [${feed.name}]:`, errorMsg)
-      stats.errors++
-      stats.errorDetails.push(`${feed.name}: ${errorMsg}`)
     }
+    return stats
+  } catch (err) {
+    // Re-throw handled errors (like 401, 429)
+    if (err && typeof err === 'object' && 'statusCode' in err) {
+      throw err
+    }
+
+    // Log and wrap unhandled errors
+    console.error('[INGEST] Critical failure:', err)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Internal Server Error',
+      message: err instanceof Error ? err.message : 'Unknown error'
+    })
   }
-  return stats
 })
