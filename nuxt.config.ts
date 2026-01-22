@@ -37,7 +37,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true }
+    '/': { prerender: true },
+    '/api/**': { redirect: undefined } // Disable redirects for API routes
   },
 
   compatibilityDate: '2025-01-15',
