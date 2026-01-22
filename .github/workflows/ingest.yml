@@ -14,7 +14,8 @@ jobs:
         run: |
           # Use curl to trigger the ingest endpoint
           # We capture the HTTP code to fail the job if it's not 200
-          response=$(curl -s -w "\n%{http_code}" -X POST \
+          # -L follows redirects (handles 308 permanent redirects)
+          response=$(curl -s -L -w "\n%{http_code}" -X POST \
             "${{ secrets.PRODUCTION_URL }}/api/ingest" \
             -H "Authorization: Bearer ${{ secrets.INGEST_API_KEY }}" \
             -H "Content-Type: application/json")
