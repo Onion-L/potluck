@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'node:crypto'
 import Parser from 'rss-parser'
 import { serverSupabaseServiceRole } from '#supabase/server'
-import { generateSummary } from '../utils/ingest'
+import { generateSummary, evaluateArticleImportance } from '../utils/ingest'
 import type { Database } from '../../app/types/database.types'
 
 // Simple in-memory rate limiter
@@ -153,8 +153,10 @@ export default defineEventHandler(async (event) => {
       processed: 0,
       added: 0,
       skipped: 0,
+      rejected: 0, // Articles rejected by Gatekeeper
       errors: 0,
-      errorDetails: [] as string[]
+      errorDetails: [] as string[],
+      rejectedArticles: [] as string[] // Rejected titles for debugging
     }
 
     for (const feed of feeds) {
@@ -192,7 +194,21 @@ export default defineEventHandler(async (event) => {
             continue
           }
 
-          // AI Generation
+          // === Level 1: Gatekeeper - Lightweight importance evaluation ===
+          const evaluation = await evaluateArticleImportance(
+            item.title!,
+            item.contentSnippet || item.content || ''
+          )
+
+          if (!evaluation.isHighValue) {
+            console.log(`[GATEKEEPER] Rejected: "${item.title}" | Reason: ${evaluation.reason}`)
+            stats.rejected++
+            stats.rejectedArticles.push(item.title!)
+            continue // Skip summary generation and insertion
+          }
+          // === End Gatekeeper ===
+
+          // Level 2: AI Summary Generation (only for high-value articles)
           const aiData = await generateSummary(item.title!, item.contentSnippet || item.content || '')
 
           // Insert
