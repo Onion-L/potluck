@@ -6,7 +6,12 @@ use clap::Parser;
 #[command(version, about, long_about = None)]
 pub struct Config {
     /// API base URL
-    #[arg(long, env = "POTLUCK_API_URL", default_value = "http://localhost:3000")]
+    #[arg(long, env = "POTLUCK_API_URL")]
+    #[cfg_attr(debug_assertions, arg(default_value = "http://localhost:3000"))]
+    #[cfg_attr(
+        not(debug_assertions),
+        arg(default_value = "https://potluck-xl.vercel.app")
+    )]
     pub api_url: String,
 
     /// Number of articles to fetch per page
@@ -26,7 +31,14 @@ mod tests {
     fn test_config_defaults() {
         // Simulate parsing with no arguments
         let config = Config::parse_from(&["ptlk"]);
-        assert_eq!(config.api_url, "http://localhost:3000"); // Expect 3000
+
+        let expected_url = if cfg!(debug_assertions) {
+            "http://localhost:3000"
+        } else {
+            "https://potluck-xl.vercel.app"
+        };
+
+        assert_eq!(config.api_url, expected_url);
         assert_eq!(config.limit, 50); // Expect 50
         assert_eq!(config.debug, false);
     }
