@@ -1,7 +1,9 @@
 use anyhow::Result;
 use clap::Parser;
 use crossterm::{
-    event::{self as crossterm_event, DisableMouseCapture, EnableMouseCapture, Event, KeyEventKind},
+    event::{
+        self as crossterm_event, DisableMouseCapture, EnableMouseCapture, Event, KeyEventKind,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };

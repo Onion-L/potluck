@@ -38,7 +38,11 @@ pub fn render(f: &mut Frame, app: &mut App) {
 
 fn render_title(f: &mut Frame, area: Rect) {
     let title = Paragraph::new(POTLUCK_TITLE)
-        .style(Style::default().fg(Color::Gray).add_modifier(Modifier::BOLD))
+        .style(
+            Style::default()
+                .fg(Color::Gray)
+                .add_modifier(Modifier::BOLD),
+        )
         .alignment(ratatui::layout::Alignment::Left);
     f.render_widget(title, area);
 }
@@ -58,8 +62,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
 }
 
 fn render_loading(f: &mut Frame, area: Rect) {
-    let loading = Paragraph::new("Loading articles...")
-        .style(Style::default().fg(Color::Gray));
+    let loading = Paragraph::new("Loading articles...").style(Style::default().fg(Color::Gray));
     f.render_widget(loading, area);
 }
 
@@ -97,19 +100,20 @@ fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
             Span::raw("   "),
             Span::styled(
                 "🌐  Want more? Visit Potluck Website  ↗",
-                Style::default().fg(Color::Gray).add_modifier(Modifier::ITALIC),
+                Style::default()
+                    .fg(Color::Gray)
+                    .add_modifier(Modifier::ITALIC),
             ),
         ]),
         Line::from(""),
     ])));
 
-    let list = List::new(items)
-        .highlight_style(
-            Style::default()
-                .bg(Color::Gray)
-                .fg(Color::Black)
-                .add_modifier(Modifier::BOLD),
-        );
+    let list = List::new(items).highlight_style(
+        Style::default()
+            .bg(Color::Gray)
+            .fg(Color::Black)
+            .add_modifier(Modifier::BOLD),
+    );
 
     f.render_stateful_widget(list, area, &mut app.list_state);
 }
@@ -120,10 +124,7 @@ fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListIte
     let tag_style = get_tag_style(&article.tag);
 
     lines.push(Line::from(vec![
-        Span::styled(
-            format!("[{}]", article.tag),
-            tag_style,
-        ),
+        Span::styled(format!("[{}]", article.tag), tag_style),
         Span::raw(" "),
         Span::styled(
             article.title.clone(),
@@ -134,7 +135,11 @@ fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListIte
     lines.push(Line::from(vec![
         Span::raw("   "),
         Span::styled(
-            format!("{} • {}", article.source, format_time(&article.published_at)),
+            format!(
+                "{} • {}",
+                article.source,
+                format_time(&article.published_at)
+            ),
             Style::default().fg(Color::DarkGray),
         ),
     ]));
@@ -145,7 +150,12 @@ fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListIte
         if article.summary.is_empty() {
             lines.push(Line::from(vec![
                 Span::raw("   "),
-                Span::styled("No summary available", Style::default().fg(Color::DarkGray).add_modifier(Modifier::ITALIC)),
+                Span::styled(
+                    "No summary available",
+                    Style::default()
+                        .fg(Color::DarkGray)
+                        .add_modifier(Modifier::ITALIC),
+                ),
             ]));
         } else {
             for line in wrap_text(&article.summary, 70) {
@@ -161,7 +171,9 @@ fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListIte
             Span::raw("   "),
             Span::styled(
                 format!("URL: {}", article.url),
-                Style::default().fg(Color::DarkGray).add_modifier(Modifier::UNDERLINED),
+                Style::default()
+                    .fg(Color::DarkGray)
+                    .add_modifier(Modifier::UNDERLINED),
             ),
         ]));
         lines.push(Line::from(vec![
@@ -269,8 +281,10 @@ mod tests {
         let mut terminal = Terminal::new(backend).unwrap();
         let mut app = App::new("http://localhost:3000", 50);
 
-        terminal.draw(|f| {
-            render(f, &mut app);
-        }).unwrap();
+        terminal
+            .draw(|f| {
+                render(f, &mut app);
+            })
+            .unwrap();
     }
 }

@@ -52,10 +52,7 @@ impl ApiClient {
     }
 
     pub async fn fetch_latest(&self, page: u32, limit: u32) -> Result<LatestResponse> {
-        let url = format!(
-            "{}/api/latest?page={}&limit={}",
-            self.base_url, page, limit
-        );
+        let url = format!("{}/api/latest?page={}&limit={}", self.base_url, page, limit);
 
         let response = self
             .client
