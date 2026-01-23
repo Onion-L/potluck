@@ -34,7 +34,7 @@ ptlk --limit 100
 | `Ctrl+u` / `PageUp` | Page up |
 | `Enter` | Expand / Open in browser |
 | `Space` | Toggle expand |
-| `o` | Open in browser |
+| `o` | Open article in browser |
 | `x` | Collapse all |
 | `r` | Refresh |
 | `q` / `Esc` | Quit |

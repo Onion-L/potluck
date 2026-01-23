@@ -67,9 +67,11 @@ impl App {
             return;
         }
 
+        let total_items = self.articles.len() + 1; // +1 for Website Link
+
         let i = match self.list_state.selected() {
             Some(i) => {
-                if i >= self.articles.len() - 1 {
+                if i >= total_items - 1 {
                     0
                 } else {
                     i + 1
@@ -85,15 +87,17 @@ impl App {
             return;
         }
 
+        let total_items = self.articles.len() + 1; // +1 for Website Link
+
         let i = match self.list_state.selected() {
             Some(i) => {
                 if i == 0 {
-                    self.articles.len() - 1
+                    total_items - 1
                 } else {
                     i - 1
                 }
             }
-            None => self.articles.len() - 1,
+            None => 0,
         };
         self.list_state.select(Some(i));
     }
@@ -106,7 +110,7 @@ impl App {
 
     pub fn go_to_last(&mut self) {
         if !self.articles.is_empty() {
-            self.list_state.select(Some(self.articles.len() - 1));
+            self.list_state.select(Some(self.articles.len())); // Last item (Website Link)
         }
     }
 
@@ -115,8 +119,9 @@ impl App {
             return;
         }
 
+        let total_items = self.articles.len() + 1;
         let current = self.list_state.selected().unwrap_or(0);
-        let new_index = (current + 10).min(self.articles.len() - 1);
+        let new_index = (current + 10).min(total_items - 1);
         self.list_state.select(Some(new_index));
     }
 
@@ -128,6 +133,9 @@ impl App {
 
     pub fn toggle_expand(&mut self) {
         if let Some(i) = self.list_state.selected() {
+            if i == self.articles.len() {
+                return; // Cannot expand website link
+            }
             if self.expanded.contains(&i) {
                 self.expanded.remove(&i);
             } else {
@@ -143,25 +151,43 @@ impl App {
             .unwrap_or(false)
     }
 
+    #[allow(dead_code)]
     pub fn selected_article(&self) -> Option<&Article> {
         self.list_state
             .selected()
+            .filter(|&i| i < self.articles.len()) // Ensure not the last item
             .and_then(|i| self.articles.get(i))
     }
 
     pub fn open_in_browser(&mut self) {
-        if let Some(article) = self.selected_article() {
-            if let Err(e) = open::that(&article.url) {
-                self.last_error = Some(format!("Failed to open browser: {}", e));
+        if let Some(i) = self.list_state.selected() {
+            if i == self.articles.len() {
+                // Website Link selected
+                self.open_website();
+            } else if let Some(article) = self.articles.get(i) {
+                if let Err(e) = open::that(&article.url) {
+                    self.last_error = Some(format!("Failed to open browser: {}", e));
+                }
             }
         }
     }
 
+    pub fn open_website(&mut self) {
+        let url = &self.client.base_url;
+        if let Err(e) = open::that(url) {
+            self.last_error = Some(format!("Failed to open website: {}", e));
+        }
+    }
+
     pub fn handle_enter(&mut self) {
-        if self.is_current_expanded() {
-            self.open_in_browser();
-        } else {
-            self.toggle_expand();
+        if let Some(i) = self.list_state.selected() {
+            if i == self.articles.len() {
+                self.open_website();
+            } else if self.is_current_expanded() {
+                self.open_in_browser();
+            } else {
+                self.toggle_expand();
+            }
         }
     }
 
@@ -210,16 +236,24 @@ mod tests {
     fn test_navigation() {
         let mut app = create_test_app();
 
+        // Articles length is 2. Total items: 3 (0, 1, 2)
+        // 0: Article 1
+        // 1: Article 2
+        // 2: Website Link
+
         assert_eq!(app.list_state.selected(), Some(0));
 
         app.next();
         assert_eq!(app.list_state.selected(), Some(1));
 
         app.next();
-        assert_eq!(app.list_state.selected(), Some(0));
+        assert_eq!(app.list_state.selected(), Some(2)); // Website Link
+
+        app.next();
+        assert_eq!(app.list_state.selected(), Some(0)); // Loop back to start
 
         app.previous();
-        assert_eq!(app.list_state.selected(), Some(1));
+        assert_eq!(app.list_state.selected(), Some(2)); // Loop back to end
     }
 
     #[test]

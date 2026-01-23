@@ -34,7 +34,7 @@ pub struct LatestResponse {
 
 pub struct ApiClient {
     client: reqwest::Client,
-    base_url: String,
+    pub base_url: String,
 }
 
 impl ApiClient {

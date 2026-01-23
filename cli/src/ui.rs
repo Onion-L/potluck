@@ -80,7 +80,7 @@ fn render_error(f: &mut Frame, area: Rect, msg: &str) {
 }
 
 fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
-    let items: Vec<ListItem> = app
+    let mut items: Vec<ListItem> = app
         .articles
         .iter()
         .enumerate()
@@ -89,6 +89,19 @@ fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
             create_list_item(article, is_expanded)
         })
         .collect();
+
+    // Add Website Link item
+    items.push(ListItem::new(Text::from(vec![
+        Line::from(""),
+        Line::from(vec![
+            Span::raw("   "),
+            Span::styled(
+                "🌐  Want more? Visit Potluck Website  ↗",
+                Style::default().fg(Color::Gray).add_modifier(Modifier::ITALIC),
+            ),
+        ]),
+        Line::from(""),
+    ])));
 
     let list = List::new(items)
         .highlight_style(
