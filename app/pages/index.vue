@@ -24,23 +24,24 @@ const { data: response, status, error } = await useFetch<ApiResponse>('/api/late
 // Extract articles from response
 const newsData = computed(() => response.value?.data || [])
 
-// Dynamically compute the latest date from the data (timezone-safe)
-const latestDate = computed(() => {
-  const articles = newsData.value
-  if (!articles.length) return ''
-  const dates = articles.map((item) => {
-    // Parse ISO string and extract date part safely
-    return item.publishedAt.slice(0, 10)
-  })
-  return [...new Set(dates)].sort().reverse()[0] || ''
-})
-
 const todaysNews = computed(() => {
   const articles = newsData.value
-  if (!articles.length || !latestDate.value) return []
+  if (!articles.length) return []
 
+  // Get current date and yesterday in YYYY-MM-DD format (UTC based as per app convention)
+  const now = new Date()
+  const today = now.toISOString().slice(0, 10)
+
+  const yesterdayDate = new Date(now)
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+  const yesterday = yesterdayDate.toISOString().slice(0, 10)
+
+  // Filter for articles from either today or yesterday
   return articles
-    .filter(item => item.publishedAt.startsWith(latestDate.value))
+    .filter((item) => {
+      const pubDate = item.publishedAt.slice(0, 10)
+      return pubDate === today || pubDate === yesterday
+    })
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 })
 
