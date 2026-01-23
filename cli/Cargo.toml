@@ -1,0 +1,37 @@
+[package]
+name = "ptlk"
+version = "0.1.0"
+edition = "2021"
+description = "Potluck TUI - AI-powered tech news reader"
+authors = ["Potluck Team"]
+license = "MIT"
+readme = "README.md"
+keywords = ["tui", "news", "cli", "ratatui"]
+categories = ["command-line-interface"]
+
+[[bin]]
+name = "ptlk"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = { version = "0.28", default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.28", features = ["event-stream"] }
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive", "env"] }
+anyhow = "1"
+open = "5"
+chrono = { version = "0.4", features = ["serde"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+opt-level = "z"
+
+[profile.dev]
+opt-level = 0
+debug = true
