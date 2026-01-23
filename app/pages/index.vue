@@ -21,29 +21,8 @@ interface ApiResponse {
 // Dynamic fetch from server API
 const { data: response, status, error } = await useFetch<ApiResponse>('/api/latest')
 
-// Extract articles from response
-const newsData = computed(() => response.value?.data || [])
-
-const todaysNews = computed(() => {
-  const articles = newsData.value
-  if (!articles.length) return []
-
-  // Get current date and yesterday in YYYY-MM-DD format (UTC based as per app convention)
-  const now = new Date()
-  const today = now.toISOString().slice(0, 10)
-
-  const yesterdayDate = new Date(now)
-  yesterdayDate.setDate(yesterdayDate.getDate() - 1)
-  const yesterday = yesterdayDate.toISOString().slice(0, 10)
-
-  // Filter for articles from either today or yesterday
-  return articles
-    .filter((item) => {
-      const pubDate = item.publishedAt.slice(0, 10)
-      return pubDate === today || pubDate === yesterday
-    })
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-})
+// Extract articles from response (already filtered by API to today/yesterday)
+const todaysNews = computed(() => response.value?.data || [])
 
 const formatTime = (isoString: string) => {
   // Use UTC to avoid timezone shifts

@@ -13,10 +13,21 @@ export default defineEventHandler(async (event) => {
   const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(query.limit as string) || DEFAULT_LIMIT))
   const offset = (page - 1) * limit
 
-  // Fetch articles sorted by date with pagination
+  // Calculate date range (UTC) for filtering: yesterday 00:00 to now
+  const now = new Date()
+  const yesterday = new Date(now)
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1)
+  yesterday.setUTCHours(0, 0, 0, 0)
+
+  const startDate = yesterday.toISOString()
+  const endDate = now.toISOString()
+
+  // Fetch articles from today/yesterday, sorted by date with pagination
   const { data, error, count } = await client
     .from('articles')
     .select('title, url, summary, tags, source, published_at', { count: 'exact' })
+    .gte('published_at', startDate)
+    .lte('published_at', endDate)
     .order('published_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
