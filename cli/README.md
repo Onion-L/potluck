@@ -12,7 +12,7 @@ cp target/release/ptlk ~/.local/bin/
 ## Usage
 
 ```bash
-# Default (localhost:3000)
+# Default (connects to https://potluck-xl.vercel.app in release builds)
 ptlk
 
 # Custom API URL
@@ -41,4 +41,4 @@ ptlk --limit 100
 
 ## Environment Variables
 
-- `POTLUCK_API_URL` - API base URL (default: `http://localhost:3000`)
+- `POTLUCK_API_URL` - API base URL (defaults to `https://potluck-xl.vercel.app` in release, `http://localhost:3000` in debug)
