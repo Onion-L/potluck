@@ -22,15 +22,13 @@ pub fn render(f: &mut Frame, app: &mut App) {
         .constraints([
             Constraint::Length(8), // Title
             Constraint::Min(0),    // Content
-            Constraint::Length(1), // Website Link
             Constraint::Length(1), // Footer
         ])
         .split(f.area());
 
     render_title(f, chunks[0]);
     render_content(f, chunks[1], app);
-    render_website_link(f, chunks[2], app);
-    render_footer(f, chunks[3]);
+    render_footer(f, chunks[2]);
 
     // Render error popup if exists
     if let Some(error) = &app.last_error {
@@ -85,7 +83,7 @@ fn render_error(f: &mut Frame, area: Rect, msg: &str) {
 }
 
 fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
-    let items: Vec<ListItem> = app
+    let mut items: Vec<ListItem> = app
         .articles
         .iter()
         .enumerate()
@@ -95,6 +93,23 @@ fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
         })
         .collect();
 
+    // Add Website Link item
+    let url = &app.client.base_url;
+    items.push(ListItem::new(Text::from(vec![
+        Line::from(""),
+        Line::from(vec![
+            Span::raw("   "),
+            Span::raw("Want more? Visit "),
+            Span::styled(
+                format!("{} ↗", url),
+                Style::default()
+                    .fg(Color::Blue)
+                    .add_modifier(Modifier::UNDERLINED),
+            ),
+        ]),
+        Line::from(""),
+    ])));
+
     let list = List::new(items).highlight_style(
         Style::default()
             .bg(Color::Gray)
@@ -103,22 +118,6 @@ fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
     );
 
     f.render_stateful_widget(list, area, &mut app.list_state);
-}
-
-fn render_website_link(f: &mut Frame, area: Rect, app: &mut App) {
-    let url = &app.client.base_url;
-    let text = vec![Line::from(vec![
-        Span::raw("   "),
-        Span::raw("Want more? Visit "),
-        Span::styled(
-            format!("{} ↗", url),
-            Style::default()
-                .fg(Color::Blue)
-                .add_modifier(Modifier::UNDERLINED),
-        ),
-    ])];
-    let paragraph = Paragraph::new(text);
-    f.render_widget(paragraph, area);
 }
 
 fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListItem<'static> {
