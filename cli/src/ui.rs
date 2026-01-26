@@ -83,13 +83,16 @@ fn render_error(f: &mut Frame, area: Rect, msg: &str) {
 }
 
 fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
+    // Calculate content width as 85% of terminal width, with minimum of 20
+    let content_width = ((area.width as f32) * 0.85).max(20.0) as usize;
+
     let mut items: Vec<ListItem> = app
         .articles
         .iter()
         .enumerate()
         .map(|(i, article)| {
             let is_expanded = app.expanded.contains(&i);
-            create_list_item(article, is_expanded)
+            create_list_item(article, is_expanded, content_width)
         })
         .collect();
 
@@ -120,7 +123,7 @@ fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
     f.render_stateful_widget(list, area, &mut app.list_state);
 }
 
-fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListItem<'static> {
+fn create_list_item(article: &crate::api::Article, is_expanded: bool, width: usize) -> ListItem<'static> {
     let mut lines = vec![];
 
     let tag_style = get_tag_style(&article.tag);
@@ -160,7 +163,7 @@ fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListIte
                 ),
             ]));
         } else {
-            for line in wrap_text(&article.summary, 70) {
+            for line in wrap_text(&article.summary, width.saturating_sub(3)) {
                 lines.push(Line::from(vec![
                     Span::raw("   "),
                     Span::styled(line, Style::default().fg(Color::Gray)),
@@ -169,15 +172,17 @@ fn create_list_item(article: &crate::api::Article, is_expanded: bool) -> ListIte
         }
 
         lines.push(Line::from(""));
-        lines.push(Line::from(vec![
-            Span::raw("   "),
-            Span::styled(
-                format!("URL: {}", article.url),
-                Style::default()
-                    .fg(Color::DarkGray)
-                    .add_modifier(Modifier::UNDERLINED),
-            ),
-        ]));
+        for line in wrap_text(&format!("URL: {}", article.url), width.saturating_sub(3)) {
+            lines.push(Line::from(vec![
+                Span::raw("   "),
+                Span::styled(
+                    line,
+                    Style::default()
+                        .fg(Color::DarkGray)
+                        .add_modifier(Modifier::UNDERLINED),
+                ),
+            ]));
+        }
         lines.push(Line::from(vec![
             Span::raw("   "),
             Span::styled(
@@ -205,25 +210,62 @@ fn format_time(iso_time: &str) -> String {
 }
 
 fn wrap_text(text: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut current_line = String::new();
-
-    for word in text.split_whitespace() {
-        if current_line.len() + word.len() + 1 > width && !current_line.is_empty() {
-            lines.push(current_line);
-            current_line = String::new();
-        }
-        if !current_line.is_empty() {
-            current_line.push(' ');
-        }
-        current_line.push_str(word);
+    if text.is_empty() {
+        return Vec::new();
     }
 
-    if !current_line.is_empty() {
-        lines.push(current_line);
+    let mut lines = Vec::new();
+    // Ensure minimum width to prevent degenerate cases
+    let width = width.max(10);
+
+    // First split by newlines to preserve original line breaks
+    for paragraph in text.split('\n') {
+        if paragraph.is_empty() {
+            lines.push(String::new());
+            continue;
+        }
+
+        let mut current_line = String::new();
+        let mut current_width = 0;
+
+        for ch in paragraph.chars() {
+            // Calculate display width: CJK characters take 2 columns
+            let char_width = if is_wide_char(ch) { 2 } else { 1 };
+
+            if current_width + char_width > width && !current_line.is_empty() {
+                lines.push(current_line);
+                current_line = String::new();
+                current_width = 0;
+            }
+
+            current_line.push(ch);
+            current_width += char_width;
+        }
+
+        if !current_line.is_empty() {
+            lines.push(current_line);
+        }
     }
 
     lines
+}
+
+/// Check if a character is a wide character (CJK, fullwidth, etc.)
+fn is_wide_char(ch: char) -> bool {
+    let cp = ch as u32;
+    // CJK Unified Ideographs and related ranges
+    matches!(cp,
+        0x1100..=0x115F |   // Hangul Jamo
+        0x2E80..=0x9FFF |   // CJK Radicals, Kangxi, CJK Symbols, Hiragana, Katakana, Bopomofo, Hangul, CJK Ideographs
+        0xAC00..=0xD7A3 |   // Hangul Syllables
+        0xF900..=0xFAFF |   // CJK Compatibility Ideographs
+        0xFE10..=0xFE1F |   // Vertical Forms
+        0xFE30..=0xFE6F |   // CJK Compatibility Forms
+        0xFF00..=0xFF60 |   // Fullwidth ASCII and Halfwidth CJK punctuation
+        0xFFE0..=0xFFE6 |   // Fullwidth symbols
+        0x20000..=0x2FFFF | // CJK Extension B-F
+        0x30000..=0x3FFFF   // CJK Extension G+
+    )
 }
 
 fn render_footer(f: &mut Frame, area: Rect) {
@@ -286,5 +328,52 @@ mod tests {
                 render(f, &mut app);
             })
             .unwrap();
+    }
+
+    #[test]
+    fn test_wrap_text_english() {
+        let text = "Hello world";
+        let lines = wrap_text(text, 20);
+        assert_eq!(lines, vec!["Hello world"]);
+    }
+
+    #[test]
+    fn test_wrap_text_chinese() {
+        let text = "你好世界这是一段中文";
+        let lines = wrap_text(text, 10);
+        // Each Chinese char is 2 columns, so 5 chars per line
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0], "你好世界这");
+        assert_eq!(lines[1], "是一段中文");
+    }
+
+    #[test]
+    fn test_wrap_text_with_newlines() {
+        let text = "Line1\nLine2\nLine3";
+        let lines = wrap_text(text, 50);
+        assert_eq!(lines, vec!["Line1", "Line2", "Line3"]);
+    }
+
+    #[test]
+    fn test_wrap_text_empty() {
+        let lines = wrap_text("", 50);
+        assert!(lines.is_empty());
+    }
+
+    #[test]
+    fn test_wrap_text_zero_width() {
+        // Should use minimum width of 10
+        let text = "Hello";
+        let lines = wrap_text(text, 0);
+        assert_eq!(lines, vec!["Hello"]);
+    }
+
+    #[test]
+    fn test_is_wide_char() {
+        assert!(is_wide_char('中'));
+        assert!(is_wide_char('あ'));
+        assert!(is_wide_char('한'));
+        assert!(!is_wide_char('a'));
+        assert!(!is_wide_char('1'));
     }
 }
