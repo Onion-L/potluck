@@ -6,6 +6,12 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![DeepSeek](https://img.shields.io/badge/AI-DeepSeek-blue)](https://deepseek.com)
 
+## 📸 Screenshots
+
+| Web | Terminal |
+|-----|----------|
+| ![Web UI](public/web.png) | ![Terminal TUI](public/terminal.png) |
+
 ## ✨ Features
 
 - 📰 **Auto RSS Ingestion** — Fetches tech news from multiple sources
