@@ -38,14 +38,22 @@ export default defineEventHandler(async (event) => {
     : null
 
   return {
-    data: resultData.map(item => ({
-      title: item.title,
-      url: item.url,
-      summary: item.summary || '',
-      tag: item.tags?.[0] || 'Tech',
-      source: item.source || 'Unknown',
-      publishedAt: item.published_at
-    })),
+    data: resultData.map((item) => {
+      // Briefing date is the day after publication (content is summarized the next day)
+      const publishedDate = new Date(item.published_at)
+      publishedDate.setUTCDate(publishedDate.getUTCDate() + 1)
+      const briefingDate = publishedDate.toISOString().slice(0, 10)
+
+      return {
+        title: item.title,
+        url: item.url,
+        summary: item.summary || '',
+        tag: item.tags?.[0] || 'Tech',
+        source: item.source || 'Unknown',
+        publishedAt: item.published_at,
+        briefingDate
+      }
+    }),
     nextCursor,
     hasMore
   }

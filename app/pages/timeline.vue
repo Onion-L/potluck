@@ -6,6 +6,7 @@ interface NewsItem {
   tag: string
   source: string
   publishedAt: string
+  briefingDate: string
 }
 
 interface TimelineResponse {
@@ -14,24 +15,39 @@ interface TimelineResponse {
   hasMore: boolean
 }
 
-// State
-const articles = ref<NewsItem[]>([])
-const nextCursor = ref<string | null>(null)
+// SSR with lazy client navigation: data loads on server for direct visits,
+// but shows loading state during client-side navigation
+const { data: initialData, error: initialError, status } = await useFetch<TimelineResponse>('/api/timeline', {
+  lazy: true
+})
+
+// State (hydrated from SSR or updated on client navigation)
+const articles = ref<NewsItem[]>(initialData.value?.data || [])
+const nextCursor = ref<string | null>(initialData.value?.nextCursor || null)
+const hasMore = ref(initialData.value?.hasMore ?? true)
 const isLoading = ref(false)
-const hasMore = ref(true)
-const error = ref<Error | null>(null)
+const error = ref<Error | null>(initialError.value as Error | null)
 const loadTrigger = ref<HTMLElement>()
 
-// Load function
+// Sync state when lazy fetch completes (for client-side navigation)
+watch(initialData, (newData) => {
+  if (newData && articles.value.length === 0) {
+    articles.value = newData.data || []
+    nextCursor.value = newData.nextCursor
+    hasMore.value = newData.hasMore
+  }
+})
+
+// Load more function (client-side only, for infinite scroll)
 const loadMore = async () => {
-  if (isLoading.value || !hasMore.value) return
+  if (isLoading.value || !hasMore.value || !nextCursor.value) return
 
   isLoading.value = true
-  error.value = null
 
   try {
-    const params = nextCursor.value ? { cursor: nextCursor.value } : {}
-    const res = await $fetch<TimelineResponse>('/api/timeline', { params })
+    const res = await $fetch<TimelineResponse>('/api/timeline', {
+      params: { cursor: nextCursor.value }
+    })
 
     if (res.data.length) {
       articles.value.push(...res.data)
@@ -59,7 +75,7 @@ const groupedNews = computed(() => {
   )
 
   sorted.forEach((item) => {
-    const dateKey = item.publishedAt.slice(0, 10)
+    const dateKey = item.briefingDate
     if (!groups[dateKey]) groups[dateKey] = []
     groups[dateKey].push(item)
   })
@@ -67,11 +83,8 @@ const groupedNews = computed(() => {
   return groups
 })
 
-// Initial load & Infinite Scroll
+// Infinite Scroll (initial data already loaded via SSR)
 onMounted(() => {
-  // Initial load
-  loadMore()
-
   // Intersection Observer
   const observer = new IntersectionObserver(
     (entries) => {
@@ -135,9 +148,25 @@ const currentDate = new Date().toLocaleDateString('en-US', {
     <UContainer class="py-12 md:py-20 relative z-10 max-w-4xl">
       <AppHeader />
 
+      <!-- Initial Loading State -->
+      <div
+        v-if="status === 'pending' && articles.length === 0"
+        class="py-20 text-center"
+      >
+        <div class="inline-block p-4 rounded-full bg-stone-100 dark:bg-stone-900 mb-6 animate-pulse">
+          <UIcon
+            name="i-lucide-loader-2"
+            class="w-8 h-8 text-stone-400 animate-spin"
+          />
+        </div>
+        <p class="text-stone-500 dark:text-stone-400">
+          Loading timeline...
+        </p>
+      </div>
+
       <!-- Error State -->
       <div
-        v-if="error && articles.length === 0"
+        v-else-if="error && articles.length === 0"
         class="py-20 text-center"
       >
         <div class="inline-block p-4 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
@@ -163,7 +192,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
 
       <!-- Empty State -->
       <div
-        v-else-if="!isLoading && articles.length === 0"
+        v-else-if="status === 'success' && articles.length === 0"
         class="py-20 text-center"
       >
         <div class="inline-block p-4 rounded-full bg-stone-100 dark:bg-stone-900 mb-6">

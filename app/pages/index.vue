@@ -6,6 +6,7 @@ interface NewsItem {
   tag: string
   source: string
   publishedAt: string
+  briefingDate: string
 }
 
 interface ApiResponse {
