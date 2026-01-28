@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true },
+    '/': { isr: 300 }, // ISR: revalidate every 5 minutes
     '/api/**': { redirect: undefined } // Disable redirects for API routes
   },
 
