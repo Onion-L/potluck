@@ -39,14 +39,22 @@ export default defineEventHandler(async (event) => {
   // Set cache headers (5 minutes for public caching)
   setHeader(event, 'Cache-Control', 'public, max-age=300, s-maxage=300')
 
-  const articles = data?.map(item => ({
-    title: item.title,
-    url: item.url,
-    summary: item.summary || '',
-    tag: item.tags?.[0] || 'Tech',
-    source: item.source || 'Unknown',
-    publishedAt: item.published_at
-  })) || []
+  const articles = data?.map((item) => {
+    // Briefing date is the day after publication (content is summarized the next day)
+    const publishedDate = new Date(item.published_at)
+    publishedDate.setUTCDate(publishedDate.getUTCDate() + 1)
+    const briefingDate = publishedDate.toISOString().slice(0, 10)
+
+    return {
+      title: item.title,
+      url: item.url,
+      summary: item.summary || '',
+      tag: item.tags?.[0] || 'Tech',
+      source: item.source || 'Unknown',
+      publishedAt: item.published_at,
+      briefingDate
+    }
+  }) || []
 
   return {
     data: articles,

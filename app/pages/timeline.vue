@@ -6,6 +6,7 @@ interface NewsItem {
   tag: string
   source: string
   publishedAt: string
+  briefingDate: string
 }
 
 interface TimelineResponse {
@@ -74,7 +75,7 @@ const groupedNews = computed(() => {
   )
 
   sorted.forEach((item) => {
-    const dateKey = item.publishedAt.slice(0, 10)
+    const dateKey = item.briefingDate
     if (!groups[dateKey]) groups[dateKey] = []
     groups[dateKey].push(item)
   })
