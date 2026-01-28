@@ -14,24 +14,27 @@ interface TimelineResponse {
   hasMore: boolean
 }
 
-// State
-const articles = ref<NewsItem[]>([])
-const nextCursor = ref<string | null>(null)
+// SSR: Fetch initial data on server
+const { data: initialData, error: initialError } = await useFetch<TimelineResponse>('/api/timeline')
+
+// State (hydrated from SSR)
+const articles = ref<NewsItem[]>(initialData.value?.data || [])
+const nextCursor = ref<string | null>(initialData.value?.nextCursor || null)
+const hasMore = ref(initialData.value?.hasMore ?? true)
 const isLoading = ref(false)
-const hasMore = ref(true)
-const error = ref<Error | null>(null)
+const error = ref<Error | null>(initialError.value as Error | null)
 const loadTrigger = ref<HTMLElement>()
 
-// Load function
+// Load more function (client-side only, for infinite scroll)
 const loadMore = async () => {
-  if (isLoading.value || !hasMore.value) return
+  if (isLoading.value || !hasMore.value || !nextCursor.value) return
 
   isLoading.value = true
-  error.value = null
 
   try {
-    const params = nextCursor.value ? { cursor: nextCursor.value } : {}
-    const res = await $fetch<TimelineResponse>('/api/timeline', { params })
+    const res = await $fetch<TimelineResponse>('/api/timeline', {
+      params: { cursor: nextCursor.value }
+    })
 
     if (res.data.length) {
       articles.value.push(...res.data)
@@ -67,11 +70,8 @@ const groupedNews = computed(() => {
   return groups
 })
 
-// Initial load & Infinite Scroll
+// Infinite Scroll (initial data already loaded via SSR)
 onMounted(() => {
-  // Initial load
-  loadMore()
-
   // Intersection Observer
   const observer = new IntersectionObserver(
     (entries) => {
