@@ -236,7 +236,7 @@ const currentDate = new Date().toLocaleDateString('en-US', {
               :key="index"
               class="relative pl-8 md:pl-12 group"
             >
-              <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 transition-all duration-300 z-10" />
+              <div class="absolute -left-2.25 top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 transition-all duration-300 z-10" />
 
               <a
                 :href="item.url"
