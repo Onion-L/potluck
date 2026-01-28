@@ -17,7 +17,7 @@ const isDark = computed({
 })
 
 const route = useRoute()
-const isHome = computed(() => route.path === '/')
+const isToday = computed(() => route.path === '/today')
 const isTimeline = computed(() => route.path === '/timeline')
 </script>
 
@@ -37,9 +37,9 @@ const isTimeline = computed(() => route.path === '/timeline')
     <div class="flex items-center gap-6 self-center md:self-end md:mb-4">
       <nav class="flex items-center gap-6">
         <NuxtLink
-          to="/"
+          to="/today"
           class="text-sm tracking-wide transition-all duration-300 decoration-2 underline-offset-4"
-          :class="isHome ? 'font-bold text-stone-900 underline dark:text-stone-100' : 'font-medium text-stone-500 hover:text-stone-900 hover:underline dark:text-stone-400 dark:hover:text-stone-50'"
+          :class="isToday ? 'font-bold text-stone-900 underline dark:text-stone-100' : 'font-medium text-stone-500 hover:text-stone-900 hover:underline dark:text-stone-400 dark:hover:text-stone-50'"
         >
           Today
         </NuxtLink>
