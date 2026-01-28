@@ -5,6 +5,7 @@ edition = "2021"
 description = "Potluck TUI - AI-powered tech news reader"
 authors = ["Potluck Team"]
 license = "MIT"
+repository = "https://github.com/Onion-L/potluck"
 readme = "README.md"
 keywords = ["tui", "news", "cli", "ratatui"]
 categories = ["command-line-interface"]
