@@ -141,13 +141,6 @@ impl App {
         }
     }
 
-    pub fn is_current_expanded(&self) -> bool {
-        self.list_state
-            .selected()
-            .map(|i| self.expanded.contains(&i))
-            .unwrap_or(false)
-    }
-
     #[allow(dead_code)]
     pub fn selected_article(&self) -> Option<&Article> {
         self.list_state
@@ -175,11 +168,7 @@ impl App {
 
     pub fn handle_enter(&mut self) {
         if self.list_state.selected().is_some() {
-            if self.is_current_expanded() {
-                self.open_in_browser();
-            } else {
-                self.toggle_expand();
-            }
+            self.open_in_browser();
         }
     }
 

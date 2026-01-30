@@ -123,7 +123,11 @@ fn render_article_list(f: &mut Frame, area: Rect, app: &mut App) {
     f.render_stateful_widget(list, area, &mut app.list_state);
 }
 
-fn create_list_item(article: &crate::api::Article, is_expanded: bool, width: usize) -> ListItem<'static> {
+fn create_list_item(
+    article: &crate::api::Article,
+    is_expanded: bool,
+    width: usize,
+) -> ListItem<'static> {
     let mut lines = vec![];
 
     let tag_style = get_tag_style(&article.tag);

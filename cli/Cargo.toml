@@ -1,6 +1,6 @@
 [package]
 name = "ptlk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Potluck TUI - AI-powered tech news reader"
 authors = ["Potluck Team"]
