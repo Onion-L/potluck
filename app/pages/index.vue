@@ -74,10 +74,9 @@ const workflow = [
             <UButton
               :icon="isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'"
               color="neutral"
-              variant="ghost"
-              size="sm"
+              variant="link"
+              size="md"
               aria-label="Toggle theme"
-              class="min-h-[44px] min-w-[44px]"
               @click="isDark = !isDark"
             />
           </ClientOnly>
