@@ -224,30 +224,30 @@ const currentDate = new Date().toLocaleDateString('en-US', {
           class="relative"
         >
           <!-- Date Header -->
-          <div class="sticky top-6 z-30 mb-12 flex justify-start -ml-4 md:-ml-8">
-            <h2 class="text-4xl md:text-5xl font-serif font-bold text-stone-900 dark:text-stone-100 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md px-6 py-2 rounded-r-full shadow-sm border-l-8 border-stone-900 dark:border-stone-100">
+          <div class="sticky top-4 md:top-6 z-30 mb-8 md:mb-12 flex justify-start -ml-4 md:-ml-8">
+            <h2 class="text-2xl sm:text-3xl md:text-5xl font-serif font-bold text-stone-900 dark:text-stone-100 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-md px-4 md:px-6 py-2 rounded-r-full shadow-sm border-l-4 md:border-l-8 border-stone-900 dark:border-stone-100">
               {{ formatDateHeader(date) }}
             </h2>
           </div>
 
-          <div class="space-y-16 pl-6 md:pl-10 border-l-2 border-stone-200 dark:border-stone-800 ml-4 md:ml-8 relative">
+          <div class="space-y-12 md:space-y-16 pl-4 sm:pl-6 md:pl-10 border-l-2 border-stone-200 dark:border-stone-800 ml-3 sm:ml-4 md:ml-8 relative">
             <article
               v-for="(item, index) in items"
               :key="index"
-              class="relative pl-8 md:pl-12 group"
+              class="relative pl-5 sm:pl-6 md:pl-12 group"
             >
-              <div class="absolute -left-2.25 top-2 w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 transition-all duration-300 z-10" />
+              <div class="absolute -left-[9px] sm:-left-2.5 top-1.5 sm:top-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-stone-200 dark:bg-stone-800 ring-2 sm:ring-4 ring-stone-50 dark:ring-stone-950 group-hover:bg-stone-900 dark:group-hover:bg-stone-100 group-hover:scale-125 transition-all duration-300 z-10" />
 
               <a
                 :href="item.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="block group-hover:-translate-y-1 transition-transform duration-300 p-4 -m-4 rounded-xl"
+                class="block group-hover:-translate-y-1 transition-transform duration-300 p-3 sm:p-4 -m-3 sm:-m-4 rounded-xl min-h-[44px]"
               >
-                <div class="flex flex-col gap-3">
-                  <div class="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
+                <div class="flex flex-col gap-2 sm:gap-3">
+                  <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
                     <span class="text-stone-900 dark:text-stone-100 font-bold">{{ formatTime(item.publishedAt) }}</span>
-                    <span>•</span>
+                    <span class="hidden sm:inline">•</span>
                     <span class="bg-stone-100 dark:bg-stone-900 px-2 py-0.5 rounded text-stone-600 dark:text-stone-400">{{ item.tag }}</span>
                     <span class="ml-auto flex items-center gap-1 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors">
                       {{ item.source }}
@@ -258,11 +258,11 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                     </span>
                   </div>
 
-                  <h3 class="text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-white leading-tight decoration-stone-900/30 dark:decoration-stone-100/30 underline-offset-4 decoration-2 group-hover:underline transition-all">
+                  <h3 class="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-white leading-snug sm:leading-tight decoration-stone-900/30 dark:decoration-stone-100/30 underline-offset-4 decoration-2 group-hover:underline transition-all">
                     {{ item.title }}
                   </h3>
 
-                  <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg max-w-2xl">
+                  <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-sm sm:text-base md:text-lg max-w-2xl">
                     <MarkdownRenderer :content="item.summary" />
                   </div>
                 </div>
