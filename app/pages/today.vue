@@ -182,15 +182,23 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                 <h3 class="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-stone-900 dark:text-stone-100 leading-snug md:leading-tight mb-3 decoration-stone-900/30 dark:decoration-stone-100/30 underline-offset-4 decoration-2 group-hover:underline transition-all">
                   {{ item.title }}
                 </h3>
-                <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg mb-3">
+                <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-base md:text-lg mb-4">
                   <MarkdownRenderer
                     :content="item.summary"
                   />
                 </div>
-                <div class="text-xs text-stone-400 font-medium flex items-center gap-1 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors min-h-[24px]">
-                  {{ item.source }} <UIcon
-                    name="i-lucide-arrow-up-right"
-                    class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                <div class="flex items-center justify-between">
+                  <div class="text-xs text-stone-400 font-medium flex items-center gap-1 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors min-h-[24px]">
+                    {{ item.source }} <UIcon
+                      name="i-lucide-arrow-up-right"
+                      class="w-3 h-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
+                  </div>
+                  <AISummaryButton
+                    :title="item.title"
+                    :url="item.url"
+                    variant="subtle"
+                    size="sm"
                   />
                 </div>
               </div>

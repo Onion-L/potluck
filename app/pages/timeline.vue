@@ -262,9 +262,16 @@ const currentDate = new Date().toLocaleDateString('en-US', {
                     {{ item.title }}
                   </h3>
 
-                  <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-sm sm:text-base md:text-lg max-w-2xl">
+                  <div class="text-stone-600 dark:text-stone-400 leading-relaxed text-sm sm:text-base md:text-lg max-w-2xl mb-3">
                     <MarkdownRenderer :content="item.summary" />
                   </div>
+
+                  <AISummaryButton
+                    :title="item.title"
+                    :url="item.url"
+                    variant="ghost"
+                    size="sm"
+                  />
                 </div>
               </a>
             </article>
