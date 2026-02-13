@@ -27,7 +27,7 @@ const handleClick = async (event: MouseEvent) => {
     isCopied.value = true
     toast.add({
       title: '已复制到剪贴板',
-      description: '正在打开 Kimi...',
+      description: '正在打开 Claude...',
       icon: 'i-lucide-check',
       color: 'success'
     })
@@ -37,14 +37,14 @@ const handleClick = async (event: MouseEvent) => {
   } catch {
     toast.add({
       title: '复制失败',
-      description: '正在打开 Kimi，请手动粘贴',
+      description: '正在打开 Claude，请手动粘贴',
       icon: 'i-lucide-alert-circle',
       color: 'warning'
     })
   }
 
-  // 跳转到 kimi.com
-  window.open('https://kimi.com', '_blank', 'noopener,noreferrer')
+  // 跳转到 claude.ai
+  window.open('https://claude.ai', '_blank', 'noopener,noreferrer')
 }
 
 const variantClasses = {
