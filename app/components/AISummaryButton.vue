@@ -19,15 +19,15 @@ const handleClick = async (event: MouseEvent) => {
   event.stopPropagation()
   event.preventDefault()
 
-  const prompt = `请总结这篇文章的主要内容：${props.title}\n\n文章链接：${props.url}`
+  const prompt = `Summarize the main content of this article: ${props.title}\n\nArticle link: ${props.url}`
 
   // 复制到剪贴板
   try {
     await navigator.clipboard.writeText(prompt)
     isCopied.value = true
     toast.add({
-      title: '已复制到剪贴板',
-      description: '正在打开 Claude...',
+      title: 'Copied to clipboard',
+      description: 'Opening z.ai...',
       icon: 'i-lucide-check',
       color: 'success'
     })
@@ -36,15 +36,15 @@ const handleClick = async (event: MouseEvent) => {
     }, 2000)
   } catch {
     toast.add({
-      title: '复制失败',
-      description: '正在打开 Claude，请手动粘贴',
+      title: 'Copy failed',
+      description: 'Opening z.ai, please paste manually',
       icon: 'i-lucide-alert-circle',
       color: 'warning'
     })
   }
 
-  // 跳转到 claude.ai
-  window.open('https://claude.ai', '_blank', 'noopener,noreferrer')
+  // Open z.ai
+  window.open('https://z.ai', '_blank', 'noopener,noreferrer')
 }
 
 const variantClasses = {
@@ -74,6 +74,6 @@ const iconSizes = {
       :name="isCopied ? 'i-lucide-check' : 'i-lucide-sparkles'"
       :class="iconSizes[size]"
     />
-    <span>{{ isCopied ? '已复制' : 'AI 总结' }}</span>
+    <span>{{ isCopied ? 'Copied' : 'AI Summary' }}</span>
   </button>
 </template>
